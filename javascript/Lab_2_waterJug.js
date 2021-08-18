@@ -40,22 +40,32 @@ class Graph {
         }
     }
 
-    addEdgeByState(sourceState, destinationState) {
-        for ( let i = 0; i <= nodeID; i++ ) {
-
-        }
-
-        
-
-    }
-
     displayGraph() {
         console.log(this.#nodes);
     }
 
+    // works
     deleteNode(nodeID) {
         // first deletes the edges in other nodes that are connected to the node to be deleted
         // then deletes the node to be deleted
+
+        let N = Object.keys(this.#nodes).length;
+
+        for( let i = 0; i < N; i++ ) {
+            console.log("SKLFNLNS");
+            for ( let j = 0; j < this.#nodes[i].edges.length; j++ ) {
+                console.log("BROK: ", this.#nodes[i].edges[j] )
+                if ( this.#nodes[i].edges[j] == nodeID ) {
+                    console.log("IS IT EVEN");
+                    // delete this.#nodes[i].edges[j];
+                    console.log( this.#nodes[i].edges );
+                    this.#nodes[i].edges.splice(j,1);
+                }
+            }
+        }
+
+        delete this.#nodes[nodeID];
+
     }
 
 
@@ -211,10 +221,36 @@ function isExplored(newState) {
 function shortestDistance(graph, sourceNodeID, destinationNodeID) {
     // Returns the distance between the source and destination node in a given graph
     // done via BFS
+
+    visited = Array(nodeID).fill(false);
+    distance = Array(nodeID).fill(0);
+
+    // use array as queue with push() and shift() functions
+    queue = [];
     
+    distance[sourceNodeID] = 0;
+
+    queue.push(sourceNodeID);
+    visited[sourceNodeID] = true;
+
+    while ( !queue.length ) {
+        let x = Q.shift(); // dequeue 
 
 
+        for ( let i = 0; i < graph[x].edges.length; i++ ) {
 
+            if ( visited[ graph[x].edges[i] ] ) {
+                continue;
+            }
+
+            distance[ graph[x].edges[i] ] = distance[ x ] + 1;
+            queue.push( graph[x].edges[i] );
+            visited[ graph[x].edges[i] ] = true;
+
+        }
+    }
+
+    return distance[destinationNodeID];
 }
 
 function smartExplore(graph, state, stateID, newState) {
@@ -247,24 +283,34 @@ function smartExplore(graph, state, stateID, newState) {
 
     */
 
-    newStateID += 1; // change variable name to newStateID
-    graph.addNode(newStateID, newState);
 
-    // newStateID = ID of the new state, stateID = ID of the parent state
-    graph.addEdge(stateID, newStateID);
+    nodeID += 1; // change variable name to newStateID
+    graph.addNode(nodeID, newState);
+
+    // nodeID = ID of the new state, stateID = ID of the parent state
+    graph.addEdge(stateID, nodeID);
 
     
-    if ( !isExplored(newState) ) {
+    if ( isExplored(newState) ) {
+
         // Distance from root node to old state (root node has ID = 0)
         depthOldState = shortestDistance(graph,0, stateID);
 
         // Distance from root node to new state
-        depthNewState = shortestDistance(graph,0, newStateID);
+        depthNewState = shortestDistance(graph,0, nodeID);
+
+        graph.displayGraph();
+        console.log(depthOldState, depthNewState); 
 
 
         // we have no improvement, remove this node to prevent the generation of a Cost Inefficient Branch
-        if ( depthNewState > depthOldState ) {
-            graph.deleteNode(newStateID);
+        if ( depthNewState >= depthOldState ) {
+            console.log("BEFORE:");
+            graph.displayGraph();
+            graph.deleteNode(nodeID);
+            console.log("After:");
+            graph.displayGraph();
+            nodeID -= 1;
             return;
         }
         
@@ -272,6 +318,7 @@ function smartExplore(graph, state, stateID, newState) {
 
     statesAdded.push( newState );
 
+    // graph.displayGraph();
 
     // If control reaches here, we've added a new node to the state space tree
     // Now we need to call generateGraph() from the new node added to generate further nodes
@@ -287,9 +334,14 @@ function generateGraph(graph, state, stateID) {
     for ( let i = 0; i < numberOfMoves; i++ ) {
 
         let newState = makeMove(state, i);
+        // console.log(newState);
 
-        smartExplore(graph, state, stateID, newState);
-
+        // temporary measure
+        if ( !(newState[0] == 0 && newState[1] == 0) ) {
+            // console.log(newState);
+            smartExplore(graph, state, stateID, newState);
+        }
+        
 
 
         /*
@@ -317,6 +369,15 @@ function generateGraph(graph, state, stateID) {
 
 generateGraph(graph, [0,0], 0);
 graph.displayGraph();
+
+
+
+
+
+
+
+
+console.log("Reached the end");
 
 
 

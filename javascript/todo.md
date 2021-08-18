@@ -2,6 +2,10 @@
 
 shortestDistance() function 
 
-deleteEdge() function
-
 Testing of smartExplore()
+
+
+New things added: 
+
+Untested:
+smartExplore, shortestDistance
