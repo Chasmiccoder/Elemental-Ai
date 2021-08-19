@@ -52,13 +52,13 @@ class Graph {
         let N = Object.keys(this.#nodes).length;
 
         for( let i = 0; i < N; i++ ) {
-            console.log("SKLFNLNS");
+            // console.log("SKLFNLNS");
             for ( let j = 0; j < this.#nodes[i].edges.length; j++ ) {
-                console.log("BROK: ", this.#nodes[i].edges[j] )
+                // console.log("BROK: ", this.#nodes[i].edges[j] )
                 if ( this.#nodes[i].edges[j] == nodeID ) {
-                    console.log("IS IT EVEN");
+                    // console.log("IS IT EVEN");
                     // delete this.#nodes[i].edges[j];
-                    console.log( this.#nodes[i].edges );
+                    // console.log( this.#nodes[i].edges );
                     this.#nodes[i].edges.splice(j,1);
                 }
             }
@@ -66,6 +66,10 @@ class Graph {
 
         delete this.#nodes[nodeID];
 
+    }
+
+    getEdges(node) {
+        return this.#nodes[node].edges;
     }
 
 
@@ -116,6 +120,43 @@ class Graph {
 }
 
 
+
+
+
+/*
+Test graph
+
+    0
+   1  2
+   3
+   4
+
+
+let g =  new Graph();
+g.addNode(0, [0,0]);
+g.addNode(1, [0,3]);
+g.addNode(2, [4,0]);
+g.addNode(3, [0,4]);
+g.addNode(4, [2,2]);
+
+g.addEdge(0,1);
+g.addEdge(0,2);
+g.addEdge(3,1);
+g.addEdge(3,4);
+
+let result = shortestDistance(g, 0,4,5);
+
+console.log("RESULT: ", result);
+
+result = shortestDistance(g,0,2,5);
+console.log("RESULT: ", result);
+*/
+
+
+
+
+
+
 let graph = new Graph();
 
 graph.addNode(0, [0,0]);
@@ -130,6 +171,9 @@ var capacity = [4,3];
 
 function makeMove(state, move) {
     newState = [...state]; // making a copy of the state
+
+    console.log("ENTERING ", move);
+    console.log("Old State:", state);
 
     // Empty Jug A
     if ( move == 0 ) {
@@ -148,10 +192,14 @@ function makeMove(state, move) {
         newState[1] = capacity[1];
     }
 
+    // NOTE THIS IS WRONG getting [2,3]->[2,1], [3,3] -> [3,2]
     // Pour Contents of A in B
     // Case 1 - A can fully fill B. A may or may not have water left
     // Case 2 - A will fill B until it runs out of water. B may or may not be full
     else if ( move == 4 ) {
+
+        
+
         
         // if Jug B is not full
         if ( newState[1] < capacity[1] ) {
@@ -160,7 +208,7 @@ function makeMove(state, move) {
             if ( capacity[1] - newState[1] < newState[0] ) {
                 // A = A - (3-B), B = 3
                 newState[0] -= capacity[1] - newState[1];
-                newState[1] = newState[1];
+                newState[1] = capacity[1];
             }
             
             // case 2
@@ -170,8 +218,10 @@ function makeMove(state, move) {
                 newState[0] = 0;
             }
         }
+        
     }
 
+    // NOTE THIS IS WRONG getting [2,3]->[2,1]
     // Pour Contents of B in A
     // Case 1 - B can fully fill A. B may or may not have water left
     // Case 2 - B will fill A until it runs out of water. A may or may not be full
@@ -184,7 +234,7 @@ function makeMove(state, move) {
             if ( capacity[0] - newState[0] < newState[1] ) {
                 // B = B - (4-A), A = 4
                 newState[1] -= capacity[0] - newState[0];
-                newState[0] = newState[0];
+                newState[0] = capacity[0];
             }
             
             // case 2
@@ -205,6 +255,8 @@ function makeMove(state, move) {
         // Put this whole thing in 1 line
     }
 
+    console.log("NEW STATE AFTER MOVE:", newState);
+
     return newState;
 }
 
@@ -218,41 +270,55 @@ function isExplored(newState) {
     return false;
 }
 
-function shortestDistance(graph, sourceNodeID, destinationNodeID) {
+// untested (Working now)
+function shortestDistance(graph, sourceNodeID, destinationNodeID, n) {
     // Returns the distance between the source and destination node in a given graph
     // done via BFS
+    // n = Total number of nodes
 
-    visited = Array(nodeID).fill(false);
-    distance = Array(nodeID).fill(0);
+    // let visited = Array(nodeID).fill(false);
+    // let distance = Array(nodeID).fill(0);
+
+    let visited = [];
+    let distance = [];
+
+    // console.log("VALUE OF N:", n);
+    
+    for ( let i = 0; i <= n; i++ ) {
+        visited.push(false);
+        distance.push(0);
+    }
+    
 
     // use array as queue with push() and shift() functions
-    queue = [];
+    let queue = [];
     
     distance[sourceNodeID] = 0;
 
     queue.push(sourceNodeID);
     visited[sourceNodeID] = true;
 
-    while ( !queue.length ) {
-        let x = Q.shift(); // dequeue 
+    while ( queue.length != 0 ) {
+        let x = queue.shift(); // dequeue 
 
+        let edgesOfX = graph.getEdges(x);
 
-        for ( let i = 0; i < graph[x].edges.length; i++ ) {
+        for ( let i = 0; i < edgesOfX.length; i++ ) {
 
-            if ( visited[ graph[x].edges[i] ] ) {
+            if ( visited[ edgesOfX[i] ] ) {
                 continue;
             }
 
-            distance[ graph[x].edges[i] ] = distance[ x ] + 1;
-            queue.push( graph[x].edges[i] );
-            visited[ graph[x].edges[i] ] = true;
-
+            distance[ edgesOfX[i] ] = distance[ x ] + 1;
+            queue.push( edgesOfX[i] );
+            visited[ edgesOfX[i] ] = true;
         }
     }
 
     return distance[destinationNodeID];
 }
 
+// untested
 function smartExplore(graph, state, stateID, newState) {
     /*
     same task as isExplored(), but the problem is that if the graph is like this:
@@ -294,22 +360,25 @@ function smartExplore(graph, state, stateID, newState) {
     if ( isExplored(newState) ) {
 
         // Distance from root node to old state (root node has ID = 0)
-        depthOldState = shortestDistance(graph,0, stateID);
+        depthOldState = shortestDistance(graph,0, stateID, nodeID);
 
         // Distance from root node to new state
-        depthNewState = shortestDistance(graph,0, nodeID);
+        depthNewState = shortestDistance(graph,0, nodeID, nodeID);
 
-        graph.displayGraph();
-        console.log(depthOldState, depthNewState); 
+        // graph.displayGraph(); // HERE
+        console.log("old state:", state);
+        console.log("new state:", newState);
+        console.log("Depth old state:", depthOldState);
+        console.log("Depth new state:", depthNewState);
 
 
         // we have no improvement, remove this node to prevent the generation of a Cost Inefficient Branch
         if ( depthNewState >= depthOldState ) {
-            console.log("BEFORE:");
-            graph.displayGraph();
+            // console.log("BEFORE:");
+            // graph.displayGraph();
             graph.deleteNode(nodeID);
-            console.log("After:");
-            graph.displayGraph();
+            // console.log("After:");
+            // graph.displayGraph();
             nodeID -= 1;
             return;
         }
