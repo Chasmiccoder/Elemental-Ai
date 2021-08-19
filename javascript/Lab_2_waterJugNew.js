@@ -1,10 +1,53 @@
 /*
-Idea:
+Concept -
+=========
 Generate all possible states from the root state ( initial state = [0,0] )
 The total number of nodes in the graph is finite and small since we'll not explore nodes
 more than once
 
+
+Possible Operations -
+=====================
+Empty Jug A
+Empty Jug B
+Fill Jug A
+Fill Jug B
+
+Pour Contents of A in B: if (amount of water in B < capacity of B) and A can fully fill B and still have water leftover 
+Pour Contents of A in B: if (amount of water in B < capacity of B) and A can fill B until A runs out of water (B still has some empty space)
+
+Pour Contents of B in A: if (amount of water in A < capacity of A) and B can fully fill A and still have water leftover 
+Pour Contents of B in A: if (amount of water in A < capacity of A) and B can fill A until B runs out of water (A still has some empty space)
+
+
+
+State Space Tree Generation -
+=============================
+
+New searching / exploring logic. First generate a list of all possible states
+In the newExplore() function check if the new state belongs to the list of states to be generated.
+If it does, then return false, which means that we have to add the state.
+If it doesn't then return true, because this state has already been added.
+Keep generating the tree until statesToBeAdded becomes empty.
+
+This new tree generation approach means that we won't need to find the shortest distance, 
+and we won't need smartExplore
+
+
+Notes -
+=======
+
+need to use recursion to generate the graph
+We don't need a graph explicitly to solve the problem, but will need one for the visualization
+
+define previous state
+define set of all moves
+make a move on previous state. Check if the obtained state is legal.
+If legal, officially make the move and recursively solve. Then move on to the next move
+If not legal, don't make that move, go to the next one
+
 */
+
 
 class Graph {
     #nodes;
@@ -14,8 +57,7 @@ class Graph {
     }
 
     addNode(node, state_) {
-        // this.#nodes[node] = [];
-
+        
         this.#nodes[node] = {
             state: state_,
             edges:[],
@@ -44,7 +86,6 @@ class Graph {
         console.log(this.#nodes);
     }
 
-    // works
     deleteNode(nodeID) {
         // first deletes the edges in other nodes that are connected to the node to be deleted
         // then deletes the node to be deleted
@@ -52,20 +93,16 @@ class Graph {
         let N = Object.keys(this.#nodes).length;
 
         for( let i = 0; i < N; i++ ) {
-            // console.log("SKLFNLNS");
+            
             for ( let j = 0; j < this.#nodes[i].edges.length; j++ ) {
-                // console.log("BROK: ", this.#nodes[i].edges[j] )
+                
                 if ( this.#nodes[i].edges[j] == nodeID ) {
-                    // console.log("IS IT EVEN");
-                    // delete this.#nodes[i].edges[j];
-                    // console.log( this.#nodes[i].edges );
+                    
                     this.#nodes[i].edges.splice(j,1);
                 }
             }
         }
-
         delete this.#nodes[nodeID];
-
     }
 
     getEdges(node) {
@@ -120,57 +157,9 @@ class Graph {
 }
 
 
-
-
-
-/*
-Test graph
-
-    0
-   1  2
-   3
-   4
-
-
-let g =  new Graph();
-g.addNode(0, [0,0]);
-g.addNode(1, [0,3]);
-g.addNode(2, [4,0]);
-g.addNode(3, [0,4]);
-g.addNode(4, [2,2]);
-
-g.addEdge(0,1);
-g.addEdge(0,2);
-g.addEdge(3,1);
-g.addEdge(3,4);
-
-let result = shortestDistance(g, 0,4,5);
-
-console.log("RESULT: ", result);
-
-result = shortestDistance(g,0,2,5);
-console.log("RESULT: ", result);
-*/
-
-
-
-
-
-
-let graph = new Graph();
-
-graph.addNode(0, [0,0]);
-
-// Keeps track of the states added while generating the graph
-var statesAdded = [];
-statesAdded.push( [0,0] );
-
-var numberOfMoves = 6;
-var nodeID = 0;
-var capacity = [4,3];
-
 function makeMove(state, move) {
-    newState = [...state]; // making a copy of the state
+    // making a copy of the original state
+    newState = [...state]; 
 
     console.log("ENTERING ", move);
     console.log("Old State:", state);
@@ -192,15 +181,11 @@ function makeMove(state, move) {
         newState[1] = capacity[1];
     }
 
-    // NOTE THIS IS WRONG getting [2,3]->[2,1], [3,3] -> [3,2]
     // Pour Contents of A in B
     // Case 1 - A can fully fill B. A may or may not have water left
     // Case 2 - A will fill B until it runs out of water. B may or may not be full
     else if ( move == 4 ) {
 
-        
-
-        
         // if Jug B is not full
         if ( newState[1] < capacity[1] ) {
 
@@ -221,7 +206,6 @@ function makeMove(state, move) {
         
     }
 
-    // NOTE THIS IS WRONG getting [2,3]->[2,1]
     // Pour Contents of B in A
     // Case 1 - B can fully fill A. B may or may not have water left
     // Case 2 - B will fill A until it runs out of water. A may or may not be full
@@ -255,8 +239,6 @@ function makeMove(state, move) {
         // Put this whole thing in 1 line
     }
 
-    console.log("NEW STATE AFTER MOVE:", newState);
-
     return newState;
 }
 
@@ -270,26 +252,20 @@ function isExplored(newState) {
     return false;
 }
 
-// untested (Working now)
+// might not need this function rip
 function shortestDistance(graph, sourceNodeID, destinationNodeID, n) {
     // Returns the distance between the source and destination node in a given graph
     // done via BFS
     // n = Total number of nodes
 
-    // let visited = Array(nodeID).fill(false);
-    // let distance = Array(nodeID).fill(0);
-
     let visited = [];
     let distance = [];
-
-    // console.log("VALUE OF N:", n);
     
     for ( let i = 0; i <= n; i++ ) {
         visited.push(false);
         distance.push(0);
     }
     
-
     // use array as queue with push() and shift() functions
     let queue = [];
     
@@ -318,7 +294,7 @@ function shortestDistance(graph, sourceNodeID, destinationNodeID, n) {
     return distance[destinationNodeID];
 }
 
-// untested
+
 function smartExplore(graph, state, stateID, newState) {
     /*
     same task as isExplored(), but the problem is that if the graph is like this:
@@ -403,89 +379,84 @@ function generateGraph(graph, state, stateID) {
     for ( let i = 0; i < numberOfMoves; i++ ) {
 
         let newState = makeMove(state, i);
-        // console.log(newState);
 
         // temporary measure
         if ( !(newState[0] == 0 && newState[1] == 0) ) {
-            // console.log(newState);
+            
             smartExplore(graph, state, stateID, newState);
         }
         
-
-
-        /*
-        if ( !isExplored(newState) ) {
-            
-            nodeID += 1;
-            graph.addNode(nodeID, newState);
-            // graph.addEdge(state, newState); // THIS IS NOT WORKING
-            // nodeID = ID of the new state, stateID = ID of the parent state
-            graph.addEdge(stateID, nodeID);
-            statesAdded.push( newState );
-
-            generateGraph(graph, newState, nodeID);
-              
-        }
-        */
     }
-    // while(statesAdded.length) { // refresh statesAdded array (remove all elements)
-    //     statesAdded.pop();
-    // }
-    // graph.displayGraph();
 }
+
+
+
+
+
+
+
+
+/*
+
+Main
+====
+
+
+*/
+
+
+/*
+Test graph
+
+    0
+   1  2
+   3
+   4
+
+
+let g =  new Graph();
+g.addNode(0, [0,0]);
+g.addNode(1, [0,3]);
+g.addNode(2, [4,0]);
+g.addNode(3, [0,4]);
+g.addNode(4, [2,2]);
+
+g.addEdge(0,1);
+g.addEdge(0,2);
+g.addEdge(3,1);
+g.addEdge(3,4);
+
+let result = shortestDistance(g, 0,4,5);
+
+console.log("RESULT: ", result);
+
+result = shortestDistance(g,0,2,5);
+console.log("RESULT: ", result);
+*/
+
+
+let graph = new Graph();
+
+graph.addNode(0, [0,0]);
+
+// Keeps track of the states added while generating the graph
+var statesAdded = [];
+statesAdded.push( [0,0] );
+
+var numberOfMoves = 6;
+var nodeID = 0;
+var capacity = [4,3];
+
+// contains all possible states that need to be present in the tree.
+var statesToBeAdded = generateAllStates(capacity);
+
+
 
 
 
 generateGraph(graph, [0,0], 0);
 graph.displayGraph();
-
-
-
-
-
-
-
-
 console.log("Reached the end");
-
-
-
-
-
-
-
-/*
-Possible Operations:
-Empty Jug A
-Empty Jug B
-Fill Jug A
-Fill Jug B
-
-Pour Contents of A in B: if (amount of water in B < capacity of B) and A can fully fill B and still have water leftover 
-Pour Contents of A in B: if (amount of water in B < capacity of B) and A can fill B until A runs out of water (B still has some empty space)
-
-Pour Contents of B in A: if (amount of water in A < capacity of A) and B can fully fill A and still have water leftover 
-Pour Contents of B in A: if (amount of water in A < capacity of A) and B can fill A until B runs out of water (A still has some empty space)
-
-*/
-
-
-// need to use recursion to generate the graph
-// We don't need a graph explicitly to solve the problem, but will need one for the visualization
-
-
-/*
-define previous state
-define set of all moves
-make a move on previous state. Check if the obtained state is legal.
-If legal, officially make the move and recursively solve. Then move on to the next move
-If not legal, don't make that move, go to the next one
-
-
-*/
-
-
-
 
 
 
