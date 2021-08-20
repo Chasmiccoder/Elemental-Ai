@@ -161,8 +161,8 @@ function makeMove(state, move) {
     // making a copy of the original state
     newState = [...state]; 
 
-    console.log("ENTERING ", move);
-    console.log("Old State:", state);
+    // console.log("ENTERING ", move);
+    // console.log("Old State:", state);
 
     // Empty Jug A
     if ( move == 0 ) {
@@ -242,6 +242,7 @@ function makeMove(state, move) {
     return newState;
 }
 
+/*
 function isExplored(newState) {
     for ( let i = 0; i < statesAdded.length; i++ ) {
         
@@ -293,99 +294,107 @@ function shortestDistance(graph, sourceNodeID, destinationNodeID, n) {
 
     return distance[destinationNodeID];
 }
+*/
 
 
-function smartExplore(graph, state, stateID, newState) {
+function generateAllStates(capacity) {
     /*
-    same task as isExplored(), but the problem is that if the graph is like this:
-      [0,0]
-        |
-      [4,0]
-        |
-      [4,3]
-        \
-        [0,3]
-
-    Then, when control comes back to [0,0], it won't generate the branch [0,3] since it has already
-    been generated in the branch with [4,0]. The problem with this is that [0,0] -> [0,3] is a 1 step
-    move, but in this case the generated graph will take the path, [0,0] -> [4,0] -> [4,3] -> [0,3]
-    which has a great Path Cost.
-
-    In isExplored(), we returned true if the new state had already been traversed, and in generateGraph(),
-    we didn't add that state if it had already been traversed. As a result of this, our tree has only 1 branch,
-    which will reach the needed solution, but not efficiently
-
-    In smartExplore(), we will find the distance from the initial root node to the new state, and if
-    this distance is lesser than the shortest distance from the root node to the same state which had
-    been generated before, then we will add the new state to the tree (since we found a shorter alternative)
-
-    NOTE
-    Later on, we can delete the branch with the longer route to the new State, but for now we'll just 
-    generate the entire solution space. (This may not be needed)
-
+    Number of possible states for jugs of capacity 4 and 3 is:
+    (4+1) * (3+1)
     */
 
-
-    nodeID += 1; // change variable name to newStateID
-    graph.addNode(nodeID, newState);
-
-    // nodeID = ID of the new state, stateID = ID of the parent state
-    graph.addEdge(stateID, nodeID);
-
-    
-    if ( isExplored(newState) ) {
-
-        // Distance from root node to old state (root node has ID = 0)
-        depthOldState = shortestDistance(graph,0, stateID, nodeID);
-
-        // Distance from root node to new state
-        depthNewState = shortestDistance(graph,0, nodeID, nodeID);
-
-        // graph.displayGraph(); // HERE
-        console.log("old state:", state);
-        console.log("new state:", newState);
-        console.log("Depth old state:", depthOldState);
-        console.log("Depth new state:", depthNewState);
-
-
-        // we have no improvement, remove this node to prevent the generation of a Cost Inefficient Branch
-        if ( depthNewState >= depthOldState ) {
-            // console.log("BEFORE:");
-            // graph.displayGraph();
-            graph.deleteNode(nodeID);
-            // console.log("After:");
-            // graph.displayGraph();
-            nodeID -= 1;
-            return;
+    let array = [];
+    for( let i = 0; i <= capacity[0]; i++ ) {
+        for ( let j = 0; j <= capacity[1]; j++ ) {
+            let newState = [i,j];
+            array.push(newState);
         }
-        
     }
 
-    statesAdded.push( newState );
+    return array;
+}
 
-    // graph.displayGraph();
+function deleteState(list, state) {
+    /*
+    Deletes an element from an array, by value
+    Deletes a state from a list of states
+    */
+    
+    for ( let i = 0; i < list.length; i++ ) {
+        if ( list[i][0] === state[0] && list[i][1] == state[1] ) {
+            list.splice(i, 1);
+        }
+    }
+}
 
-    // If control reaches here, we've added a new node to the state space tree
-    // Now we need to call generateGraph() from the new node added to generate further nodes
-    generateGraph(graph, newState, nodeID);
-
+function alreadyInBranch(pathList, state) {
+    /*
+    Returns true if the state is present in the pathList
+    Later, change this function to a more generalized one
+    */
+    for ( let i = 0; i < pathList.length; i++ ) {
+        if ( pathList[i][0] == state[0] && pathList[i][1] == state[1] ) {
+            return true;
+        }
+    }
+    return false;
 }
 
 
 // start this by calling generateGraph(graph, [0,0])
 // Generates the required solution tree / the entire state space starting from the intial state [0,0] 
-function generateGraph(graph, state, stateID) {
+function generateGraph(graph, state, stateID, pathList) {
 
     for ( let i = 0; i < numberOfMoves; i++ ) {
 
         let newState = makeMove(state, i);
 
-        // temporary measure
-        if ( !(newState[0] == 0 && newState[1] == 0) ) {
-            
-            smartExplore(graph, state, stateID, newState);
+        // don't consider the newly generated state if it is the same as the previous one
+        // { remove first condition of [0,0] }
+        if ( (newState[0] == 0 && newState[1] == 0) || (state[0] == newState[0] && state[1] == newState[1]) ) {
+            continue;
         }
-        
+
+        /*
+        Each branch must have a unique state.
+        For example, for tree: 
+                  0
+                /  \
+              1     2
+             / \   / \
+            3  4  5   6
+           /
+          1
+
+        Here after state 1, we got state 3, then we got state 1 again.
+        This happens because one move is Empty Jug A, and right after that, move Fill Jug A takes place
+        and we get an infinite loop.
+        To break this loop, each path will contain a path list. A path is defined as the set of 
+        nodes from the root node to the node under consideration (newState's node). If we add a node
+        to the graph, we'll update the path list. If in a future recursive call, newState is equal to
+        some state that exists in the path list, then we'll not consider it / we'll not add it
+
+        */
+        if ( alreadyInBranch(pathList, newState) ) {
+            continue;
+        }
+
+        if ( statesToBeAdded.length != 0 ) {
+            nodeID += 1;
+            graph.addNode(nodeID, newState);
+            graph.addEdge(stateID, nodeID);
+            console.log("Before num: ", statesToBeAdded.length);
+            deleteState(statesToBeAdded, newState);
+            console.log("After num: ", statesToBeAdded.length);
+            console.log("State added:", newState);
+            console.log("STATES to be added:", statesToBeAdded);
+            console.log("Graph " );
+            graph.displayGraph();
+            generateGraph(graph, newState, nodeID);
+        }
+        else {
+            console.log("REACHED:");
+        }
     }
 }
 
@@ -439,10 +448,6 @@ let graph = new Graph();
 
 graph.addNode(0, [0,0]);
 
-// Keeps track of the states added while generating the graph
-var statesAdded = [];
-statesAdded.push( [0,0] );
-
 var numberOfMoves = 6;
 var nodeID = 0;
 var capacity = [4,3];
@@ -451,8 +456,13 @@ var capacity = [4,3];
 var statesToBeAdded = generateAllStates(capacity);
 
 
+deleteState(statesToBeAdded, [0,0]);
+
+console.log("KSKFSNFKSNF", statesToBeAdded);
 
 
+// initial path list is has only the root node
+pathList = [[0,0]];
 
 generateGraph(graph, [0,0], 0);
 graph.displayGraph();
