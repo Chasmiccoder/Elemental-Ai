@@ -94,10 +94,11 @@ class Graph {
             didAdd1 = true;
         }
 
-        if ( !this.#nodes[destination].edges.includes(source) ) {
-            this.#nodes[destination].edges.push(source);
-            didAdd2 = true;
-        }
+        // Removing these lines to get a directed graph
+        // if ( !this.#nodes[destination].edges.includes(source) ) {
+        //     this.#nodes[destination].edges.push(source);
+        //     didAdd2 = true;
+        // }
 
         return didAdd1 || didAdd2;
     }
@@ -346,7 +347,7 @@ function generateGraph(graph, state, stateID) {
 
             // don't consider the newly generated state if it is the same as the previous one
             // { remove first condition of [0,0] }
-            if ( (newState[0] == 0 && newState[1] == 0) || (state[0] == newState[0] && state[1] == newState[1]) ) {
+            if ( state[0] == newState[0] && state[1] == newState[1] ) {
                 continue;
             }
 
@@ -471,4 +472,11 @@ console.log("Reached the end");
 Current Bug:
 Getting weird connections like:
 [4,0] -> [3,0]
+
+We're also getting 
+[0,0] -> [0,1]
+Shouldn't be possible
+But [0,1] -> [0,0] should be possible
+Therefore, we need a directed graph
+
 */
