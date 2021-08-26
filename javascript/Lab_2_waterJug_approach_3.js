@@ -85,14 +85,21 @@ class Graph {
         if ( !this.#nodes[source] || !this.#nodes[destination] ) {
             return false;
         }
-        
+
+        let didAdd1 = false;
+        let didAdd2 = false;
+
         if ( !this.#nodes[source].edges.includes(destination) ) {
             this.#nodes[source].edges.push(destination);
+            didAdd1 = true;
         }
 
         if ( !this.#nodes[destination].edges.includes(source) ) {
             this.#nodes[destination].edges.push(source);
+            didAdd2 = true;
         }
+
+        return didAdd1 || didAdd2;
     }
 
     displayGraph() {
@@ -103,7 +110,7 @@ class Graph {
         // first deletes the edges in other nodes that are connected to the node to be deleted
         // then deletes the node to be deleted
 
-        let N = Object.keys(this.#nodes).length;
+        let N = Object.keys(this.#nodes).length; // number of nodes in the graph
 
         for( let i = 0; i < N; i++ ) {
             
@@ -120,6 +127,24 @@ class Graph {
 
     getEdges(node) {
         return this.#nodes[node].edges;
+    }
+
+    
+    isStatePresent(state) {
+        /*
+        Scans all the states present in the class and returns the nodeID if the state mentioned is found
+        Else returns -1
+        */
+        
+        let N = Object.keys(this.#nodes).length; // number of nodes in the graph
+        for ( let i = 0; i < N; i++ ) {
+            
+            // If the state is present in the graph
+            if ( this.#nodes[i].state[0] == state[0] && this.#nodes[i].state[1] == state[1] ) {
+                return i;
+            }
+        }
+        return -1;
     }
 
 
@@ -255,61 +280,6 @@ function makeMove(state, move) {
     return newState;
 }
 
-/*
-function isExplored(newState) {
-    for ( let i = 0; i < statesAdded.length; i++ ) {
-        
-        if ( statesAdded[i][0] === newState[0] && statesAdded[i][1] === newState[1] ) {
-            return true;
-        }
-    }
-    return false;
-}
-
-// might not need this function rip
-function shortestDistance(graph, sourceNodeID, destinationNodeID, n) {
-    // Returns the distance between the source and destination node in a given graph
-    // done via BFS
-    // n = Total number of nodes
-
-    let visited = [];
-    let distance = [];
-    
-    for ( let i = 0; i <= n; i++ ) {
-        visited.push(false);
-        distance.push(0);
-    }
-    
-    // use array as queue with push() and shift() functions
-    let queue = [];
-    
-    distance[sourceNodeID] = 0;
-
-    queue.push(sourceNodeID);
-    visited[sourceNodeID] = true;
-
-    while ( queue.length != 0 ) {
-        let x = queue.shift(); // dequeue 
-
-        let edgesOfX = graph.getEdges(x);
-
-        for ( let i = 0; i < edgesOfX.length; i++ ) {
-
-            if ( visited[ edgesOfX[i] ] ) {
-                continue;
-            }
-
-            distance[ edgesOfX[i] ] = distance[ x ] + 1;
-            queue.push( edgesOfX[i] );
-            visited[ edgesOfX[i] ] = true;
-        }
-    }
-
-    return distance[destinationNodeID];
-}
-*/
-
-
 function generateAllStates(capacity) {
     /*
     Number of possible states for jugs of capacity 4 and 3 is:
@@ -356,59 +326,68 @@ function alreadyInBranch(pathList, state) {
 
 // start this by calling generateGraph(graph, [0,0])
 // Generates the required solution tree / the entire state space starting from the intial state [0,0] 
-function generateGraph(graph, state, stateID, pathList) {
+function generateGraph(graph, state, stateID) {
 
-    for ( let i = 0; i < numberOfMoves; i++ ) {
+    /*
+    Function terminates when all states that can be generated have been generated and all possible
+    paths have been recorded in the graph
+    */
 
-        let newState = makeMove(state, i);
-
-        // don't consider the newly generated state if it is the same as the previous one
-        // { remove first condition of [0,0] }
-        if ( (newState[0] == 0 && newState[1] == 0) || (state[0] == newState[0] && state[1] == newState[1]) ) {
-            continue;
-        }
-
-        /*
-        Each branch must have a unique state.
-        For example, for tree: 
-                  0
-                /  \
-              1     2
-             / \   / \
-            3  4  5   6
-           /
-          1
-
-        Here after state 1, we got state 3, then we got state 1 again.
-        This happens because one move is Empty Jug A, and right after that, move Fill Jug A takes place
-        and we get an infinite loop.
-        To break this loop, each path will contain a path list. A path is defined as the set of 
-        nodes from the root node to the node under consideration (newState's node). If we add a node
-        to the graph, we'll update the path list. If in a future recursive call, newState is equal to
-        some state that exists in the path list, then we'll not consider it / we'll not add it
-
-        */
-        if ( alreadyInBranch(pathList, newState) ) {
-            continue;
-        }
-
-        if ( statesToBeAdded.length != 0 ) {
-            nodeID += 1;
-            graph.addNode(nodeID, newState);
-            graph.addEdge(stateID, nodeID);
-            console.log("Before num: ", statesToBeAdded.length);
-            deleteState(statesToBeAdded, newState);
-            console.log("After num: ", statesToBeAdded.length);
-            console.log("State added:", newState);
-            console.log("STATES to be added:", statesToBeAdded);
-            console.log("Graph " );
-            graph.displayGraph();
-            generateGraph(graph, newState, nodeID);
-        }
-        else {
-            console.log("REACHED:");
-        }
+    // if all possible states have been generated, exit the function
+    if ( statesToBeAdded.length == 0 ) {
+        return;
     }
+
+    // while ( statesToBeAdded.length != 0 ) {
+
+        for ( let i = 0; i < numberOfMoves; i++ ) {
+
+            let newState = makeMove(state, i);
+
+            // don't consider the newly generated state if it is the same as the previous one
+            // { remove first condition of [0,0] }
+            if ( (newState[0] == 0 && newState[1] == 0) || (state[0] == newState[0] && state[1] == newState[1]) ) {
+                continue;
+            }
+
+            let newNodeID = graph.isStatePresent(newState);
+
+            // if the generated state is already in the graph, just add an edge between the parent and the found state
+            if ( newNodeID != -1 ) {
+
+                // addEdge() adds an edge only if the edge is not present. If it was not present, didAdd becomes false
+                // else it is true
+                let didAdd = graph.addEdge(stateID, newNodeID);
+
+                // this key condition helps terminate all the recursive calls
+                if ( didAdd == true ) {
+                    // console.log("ALREADY THERE!", statesToBeAdded);
+                    // graph.displayGraph();
+                    
+                    generateGraph(graph, newState, nodeID);
+                }
+
+                
+            }
+            
+            // node not found, generate a new one
+            else {
+                nodeID += 1;
+                graph.addNode(nodeID, newState);
+                graph.addEdge(stateID, nodeID);
+                deleteState(statesToBeAdded, newState);
+                // console.log("DELETED!", statesToBeAdded);
+                // graph.displayGraph();
+                generateGraph(graph, newState, nodeID);
+            }
+
+            // state = newState;
+            // stateID = nodeID;
+        }
+
+        // graph.displayGraph();
+        // console.log(statesToBeAdded);
+    // }
 }
 
 
@@ -448,12 +427,14 @@ g.addEdge(0,2);
 g.addEdge(3,1);
 g.addEdge(3,4);
 
-let result = shortestDistance(g, 0,4,5);
+// let result = shortestDistance(g, 0,4,5);
 
-console.log("RESULT: ", result);
+// console.log("RESULT: ", result);
 
-result = shortestDistance(g,0,2,5);
-console.log("RESULT: ", result);
+// result = shortestDistance(g,0,2,5);
+// console.log("RESULT: ", result);
+let result = g.isStatePresent([2,2]);
+console.log("RESULT:", result);
 */
 
 
@@ -471,26 +452,23 @@ var statesToBeAdded = generateAllStates(capacity);
 
 deleteState(statesToBeAdded, [0,0]);
 
-console.log("KSKFSNFKSNF", statesToBeAdded);
-
-
-// initial path list is has only the root node
-pathList = [[0,0]];
+console.log("States to be Added: ", statesToBeAdded);
 
 generateGraph(graph, [0,0], 0);
+
+
+// It turns out that some states just cannot be reached. They'll be present in statesToBeAdded
+console.log("Impossible States:", statesToBeAdded);
+
+
+
 graph.displayGraph();
 console.log("Reached the end");
 
 
 
 /*
-New approach:
-create generatePath(nodeID) method that returns a list containing the states from the
-root node to the nodeID. If nodeID's state is found in this path, delete it since this branch
-will not be useful
-
-BRO
-We don't need the state space to be a tree!
-It can just be a graph. If a previous node is found, just connect the parent node to the previously
-found node. Then use dijkstra's algorithm or something to find shortest paths!!! 
+Current Bug:
+Getting weird connections like:
+[4,0] -> [3,0]
 */
