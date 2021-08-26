@@ -1,12 +1,6 @@
 # Elemental-Ai
 AI based problem solver with a clean GUI that solves some of the most famous puzzles and problems out there!
 
-==========
-
-#### Development put on hold
-
-==========
-
 
 Using the source code from graphonline for now (MIT License)
 Compatible with the current project. Original source code:

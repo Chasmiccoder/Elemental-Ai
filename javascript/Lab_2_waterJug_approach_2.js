@@ -470,3 +470,14 @@ console.log("Reached the end");
 
 
 
+/*
+New approach:
+create generatePath(nodeID) method that returns a list containing the states from the
+root node to the nodeID. If nodeID's state is found in this path, delete it since this branch
+will not be useful
+
+BRO
+We don't need the state space to be a tree!
+It can just be a graph. If a previous node is found, just connect the parent node to the previously
+found node. Then use dijkstra's algorithm or something to find shortest paths!!! 
+*/
