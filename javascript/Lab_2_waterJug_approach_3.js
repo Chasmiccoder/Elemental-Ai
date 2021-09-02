@@ -353,6 +353,11 @@ function generateGraph(graph, state, stateID) {
 
             let newNodeID = graph.isStatePresent(newState);
 
+            // remove this if block
+            if (state[0] == 3 && state[1] == 3 && newState[0] == 0 && newState[1] == 0 ) {
+                console.log("\nWe're going wrong in makeMove()!!\n");
+            }
+
             // if the generated state is already in the graph, just add an edge between the parent and the found state
             if ( newNodeID != -1 ) {
 
