@@ -59,6 +59,10 @@ make a move on previous state. Check if the obtained state is legal.
 If legal, officially make the move and recursively solve. Then move on to the next move
 If not legal, don't make that move, go to the next one
 
+
+Variables
+states - An array of 2 elements with the number of litres of water in each of the two jugs
+
 */
 
 
@@ -70,45 +74,48 @@ class Graph {
     }
 
     addNode(node, state_) {
-        
         this.#nodes[node] = {
             state: state_,
             edges:[],
         };
-
-        // states is an array of 2 elements with the number of litres of water in each of the two jugs
-
     }
 
-    addEdge(source, destination) {
+    addEdge(source, destination, directedGraph = true) {
         // if either node does not exist
         if ( !this.#nodes[source] || !this.#nodes[destination] ) {
             return false;
         }
 
         let didAdd1 = false;
+        let didAdd2 = false;
 
+        // Add an edge from the source to the destination
         if ( !this.#nodes[source].edges.includes(destination) ) {
             this.#nodes[source].edges.push(destination);
             didAdd1 = true;
         }
 
-        // Removing these lines to get a directed graph
-        // if ( !this.#nodes[destination].edges.includes(source) ) {
-        //     this.#nodes[destination].edges.push(source);
-        //     didAdd2 = true;
-        // }
-
-        return didAdd1;
+        // Add an edge from destination to source if the graph is undirected
+        if ( !directedGraph ) {
+            if ( !this.#nodes[destination].edges.includes(source) ) {
+                this.#nodes[destination].edges.push(source);
+                didAdd2 = true;
+            }
+        }
+        
+        return didAdd1 || didAdd2; // if a change was made to the graph, return true
     }
 
     displayGraph() {
         console.log(this.#nodes);
     }
 
+    
     deleteNode(nodeID) {
-        // first deletes the edges in other nodes that are connected to the node to be deleted
-        // then deletes the node to be deleted
+        /*
+        First deletes the edges in other nodes that are connected to the node to be deleted
+        then deletes the node to be deleted
+        */
 
         let N = Object.keys(this.#nodes).length; // number of nodes in the graph
 
@@ -296,6 +303,9 @@ function generateAllStates(capacity) {
     return array;
 }
 
+/** 
+ * Function explanation
+*/
 function deleteState(list, state) {
     /*
     Deletes an element from an array, by value
@@ -308,8 +318,6 @@ function deleteState(list, state) {
         }
     }
 }
-
-
 
 
 // start this by calling generateGraph(graph, [0,0])
@@ -325,71 +333,43 @@ function generateGraph(graph, state, stateID) {
         return;
     }
 
-    // while ( statesToBeAdded.length != 0 ) {
+    for ( let i = 0; i < numberOfMoves; i++ ) {
 
-        for ( let i = 0; i < numberOfMoves; i++ ) {
+        let newState = makeMove(state, i);
 
-            let newState = makeMove(state, i);
-
-            // don't consider the newly generated state if it is the same as the previous one
-            // { remove first condition of [0,0] }
-            if ( state[0] == newState[0] && state[1] == newState[1] ) {
-                continue;
-            }
-
-            let newNodeID = graph.isStatePresent(newState);
-            
-            
-
-            // if the generated state is already in the graph, just add an edge between the parent and the found state
-            if ( newNodeID != -1 ) {
-
-                // addEdge() adds an edge only if the edge is not present. If it was not present, didAdd becomes false
-                // else it is true
-
-               
-                if ( stateID == 5 && newNodeID == 0 ) {
-                    console.log("\n\nDINGO BINGO\n\n");
-                    console.log("\nstate", state);
-                    
-                    console.log("\nnewstate", newState);
-                }
-                
-
-                let didAdd = graph.addEdge(stateID, newNodeID);
-
-                // this key condition helps terminate all the recursive calls
-                if ( didAdd == true ) {
-                    // console.log("ALREADY THERE!", statesToBeAdded);
-                    // graph.displayGraph();
-                    
-                    // dammit bug found!
-                    generateGraph(graph, newState, newNodeID);
-                }
-                
-            }
-            
-            // node not found, generate a new one
-            else {
-                nodeID += 1;
-                graph.addNode(nodeID, newState);
-
-                
-
-                graph.addEdge(stateID, nodeID);
-                deleteState(statesToBeAdded, newState);
-                // console.log("DELETED!", statesToBeAdded);
-                // graph.displayGraph();
-                generateGraph(graph, newState, nodeID);
-            }
-
-            // state = newState;
-            // stateID = nodeID;
+        // don't consider the newly generated state if it is the same as the previous one
+        // { remove first condition of [0,0] }
+        if ( state[0] == newState[0] && state[1] == newState[1] ) {
+            continue;
         }
 
-        // graph.displayGraph();
-        // console.log(statesToBeAdded);
-    // }
+        let newNodeID = graph.isStatePresent(newState);
+        
+        // if the generated state is already in the graph, just add an edge between the parent and the found state
+        if ( newNodeID != -1 ) {
+
+            // addEdge() adds an edge only if the edge is not present. If it was not present, didAdd becomes false
+            // else it is true
+            
+            let didAdd = graph.addEdge(stateID, newNodeID);
+
+            // this key condition helps terminate all the recursive calls
+            if ( didAdd == true ) {
+                generateGraph(graph, newState, newNodeID);
+            }
+        }
+        
+        // node not found, generate a new one
+        else {
+            nodeID += 1;
+            graph.addNode(nodeID, newState);
+
+            graph.addEdge(stateID, nodeID);
+            deleteState(statesToBeAdded, newState);
+            
+            generateGraph(graph, newState, nodeID);
+        }
+    }
 }
 
 
@@ -408,37 +388,8 @@ Main
 */
 
 
-/*
-Test graph
-
-    0
-   1  2
-   3
-   4
-*/
 
 
-let g =  new Graph();
-g.addNode(0, [0,0]);
-g.addNode(1, [0,3]);
-g.addNode(2, [4,0]);
-g.addNode(3, [0,4]);
-g.addNode(4, [2,2]);
-
-g.addEdge(0,1);
-g.addEdge(0,2);
-g.addEdge(3,1);
-g.addEdge(3,4);
-
-// let result = shortestDistance(g, 0,4,5);
-
-// console.log("RESULT: ", result);
-
-// result = shortestDistance(g,0,2,5);
-// console.log("RESULT: ", result);
-let result = g.isStatePresent([2,3]);
-console.log("RESULT:", result);
-g.displayGraph();
 
 
 
@@ -462,28 +413,31 @@ console.log("States to be Added: ", statesToBeAdded);
 generateGraph(graph, [0,0], 0);
 
 
+
+
+
+console.log("State Space Graph:");
+graph.displayGraph();
+
 // It turns out that some states just cannot be reached. They'll be present in statesToBeAdded
 console.log("Impossible States:", statesToBeAdded);
 
 
+// Final states
+let finalState = [2,0]
 
-graph.displayGraph();
+
+
+
+
 console.log("Reached the end");
 
 
 
+
+
+
 /*
-Current Bug:
-Getting weird connections like:
-[4,0] -> [3,0]
 
-We're also getting 
-[0,0] -> [0,1]
-Shouldn't be possible
-But [0,1] -> [0,0] should be possible
-Therefore, we need a directed graph
-
-
-[3,3] -> [0,0] how bro?
-
+Use shortest distance code from approach 2
 */

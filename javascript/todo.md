@@ -8,4 +8,7 @@ Problem:
 Somehow the edge [3,3] -> [0,0] 
 is getting added to the graph. This shouldn't happen.
 
+Look  into:
+https://javascript.info/comments
+
 
