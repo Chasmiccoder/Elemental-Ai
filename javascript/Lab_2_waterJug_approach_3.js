@@ -87,7 +87,6 @@ class Graph {
         }
 
         let didAdd1 = false;
-        let didAdd2 = false;
 
         if ( !this.#nodes[source].edges.includes(destination) ) {
             this.#nodes[source].edges.push(destination);
@@ -100,7 +99,7 @@ class Graph {
         //     didAdd2 = true;
         // }
 
-        return didAdd1 || didAdd2;
+        return didAdd1;
     }
 
     displayGraph() {
@@ -130,7 +129,6 @@ class Graph {
         return this.#nodes[node].edges;
     }
 
-    
     isStatePresent(state) {
         /*
         Scans all the states present in the class and returns the nodeID if the state mentioned is found
@@ -311,24 +309,12 @@ function deleteState(list, state) {
     }
 }
 
-function alreadyInBranch(pathList, state) {
-    /*
-    Returns true if the state is present in the pathList
-    Later, change this function to a more generalized one
-    */
-    for ( let i = 0; i < pathList.length; i++ ) {
-        if ( pathList[i][0] == state[0] && pathList[i][1] == state[1] ) {
-            return true;
-        }
-    }
-    return false;
-}
+
 
 
 // start this by calling generateGraph(graph, [0,0])
 // Generates the required solution tree / the entire state space starting from the intial state [0,0] 
 function generateGraph(graph, state, stateID) {
-
     /*
     Function terminates when all states that can be generated have been generated and all possible
     paths have been recorded in the graph
@@ -352,17 +338,24 @@ function generateGraph(graph, state, stateID) {
             }
 
             let newNodeID = graph.isStatePresent(newState);
-
-            // remove this if block
-            if (state[0] == 3 && state[1] == 3 && newState[0] == 0 && newState[1] == 0 ) {
-                console.log("\nWe're going wrong in makeMove()!!\n");
-            }
+            
+            
 
             // if the generated state is already in the graph, just add an edge between the parent and the found state
             if ( newNodeID != -1 ) {
 
                 // addEdge() adds an edge only if the edge is not present. If it was not present, didAdd becomes false
                 // else it is true
+
+               
+                if ( stateID == 5 && newNodeID == 0 ) {
+                    console.log("\n\nDINGO BINGO\n\n");
+                    console.log("\nstate", state);
+                    
+                    console.log("\nnewstate", newState);
+                }
+                
+
                 let didAdd = graph.addEdge(stateID, newNodeID);
 
                 // this key condition helps terminate all the recursive calls
@@ -370,9 +363,9 @@ function generateGraph(graph, state, stateID) {
                     // console.log("ALREADY THERE!", statesToBeAdded);
                     // graph.displayGraph();
                     
-                    generateGraph(graph, newState, nodeID);
+                    // dammit bug found!
+                    generateGraph(graph, newState, newNodeID);
                 }
-
                 
             }
             
@@ -380,6 +373,9 @@ function generateGraph(graph, state, stateID) {
             else {
                 nodeID += 1;
                 graph.addNode(nodeID, newState);
+
+                
+
                 graph.addEdge(stateID, nodeID);
                 deleteState(statesToBeAdded, newState);
                 // console.log("DELETED!", statesToBeAdded);
@@ -419,6 +415,7 @@ Test graph
    1  2
    3
    4
+*/
 
 
 let g =  new Graph();
@@ -439,9 +436,11 @@ g.addEdge(3,4);
 
 // result = shortestDistance(g,0,2,5);
 // console.log("RESULT: ", result);
-let result = g.isStatePresent([2,2]);
+let result = g.isStatePresent([2,3]);
 console.log("RESULT:", result);
-*/
+g.displayGraph();
+
+
 
 
 let graph = new Graph();
@@ -483,5 +482,8 @@ We're also getting
 Shouldn't be possible
 But [0,1] -> [0,0] should be possible
 Therefore, we need a directed graph
+
+
+[3,3] -> [0,0] how bro?
 
 */
