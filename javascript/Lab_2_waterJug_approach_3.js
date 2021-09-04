@@ -63,6 +63,21 @@ If not legal, don't make that move, go to the next one
 Variables
 states - An array of 2 elements with the number of litres of water in each of the two jugs
 
+
+Solving the Water Jug Problem
+We'll first implement the specific searching algorithm. Then, as each node gets 'visited',
+we'll update the graph to change the colour of the visited node.
+At then end, we'll use the shortest path function to highlight the path that the user can take
+to solve the problem.
+At the right hand side display the number of nodes the algorithm had to visit in order to
+reach the final state. This is a measure of how good the searching algo is for that particular problem
+
+1) BFS
+
+
+
+
+
 */
 
 
@@ -136,11 +151,15 @@ class Graph {
         return this.#nodes[node].edges;
     }
 
+    /**
+     * 
+     * Returns the node ID of the state.
+     * Returns -1 if the state is not found.
+     * 
+     * @param {Array} state
+     * @returns {Number} nodeID of state
+     */
     isStatePresent(state) {
-        /*
-        Scans all the states present in the class and returns the nodeID if the state mentioned is found
-        Else returns -1
-        */
         
         let N = Object.keys(this.#nodes).length; // number of nodes in the graph
         for ( let i = 0; i < N; i++ ) {
@@ -154,9 +173,19 @@ class Graph {
     }
 
 
+    /**
+     * Searches for the destination node from the source node via BFS.
+     * Updates the graph dynamically as the search is performed.
+     * 
+     * @param {Number} source 
+     * @param {Number} destination 
+     * @returns {Number} Number of nodes visited to find the destination. -1 if not found
+     */
     bfs(source, destination) {
+        let found = false;
         const queue = [source];
         const visited = {};
+        let steps = 1;
 
         while ( queue.length ) {
             let current = queue.shift();
@@ -165,17 +194,23 @@ class Graph {
             }
 
             if ( current === destination ) {
-                return true;
+                found = true;
+                break;
             }
 
             visited[current] = true;
+            steps++;
             let neighbor = this.#nodes[current].edges;
             for ( let i = 0; i < neighbor.length; i++ ) {
                 queue.push(neighbor[i]);
             }
         }
 
-        return false;
+        if ( !found ) {
+            return -1;
+        }
+
+        return steps;
     }
 
     dfs(source, destination, visited = {} ) {
@@ -197,6 +232,30 @@ class Graph {
         }
 
         return false;
+    }
+
+    /**
+     * Solves the Water Jug problem using BFS
+     * 
+     * @param {Array} finalState 
+     * @return {Number} Number of Steps taken to reach the final state
+     */
+    solveBFS(finalState) {
+        let path = [];
+        
+        let initialState = [0,0];
+
+        let source = 0;
+        let destination = this.isStatePresent(finalState);
+
+        if ( destination == -1 ) {
+            console.log("It is not possible to reach this state!");
+            return -1;
+        }
+
+        let steps = this.bfs(source, destination);
+
+        return steps;
     }
 }
 
@@ -427,7 +486,9 @@ console.log("Impossible States:", statesToBeAdded);
 let finalState = [2,0]
 
 
+graph.solveBFS(finalState);
 
+graph.bfs()
 
 
 console.log("Reached the end");
@@ -441,3 +502,4 @@ console.log("Reached the end");
 
 Use shortest distance code from approach 2
 */
+
