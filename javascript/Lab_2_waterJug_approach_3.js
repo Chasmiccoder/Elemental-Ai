@@ -76,6 +76,8 @@ reach the final state. This is a measure of how good the searching algo is for t
 
 
 
+ToDo:
+Replace N with #n wherever number of nodes is needed
 
 
 */
@@ -83,9 +85,11 @@ reach the final state. This is a measure of how good the searching algo is for t
 
 class Graph {
     #nodes;
+    #n; // number of nodes
 
     constructor() {
         this.#nodes = {};
+        this.#n = 0;
     }
 
     addNode(node, state_) {
@@ -93,6 +97,7 @@ class Graph {
             state: state_,
             edges:[],
         };
+        this.#n += 1;
     }
 
     addEdge(source, destination, directedGraph = true) {
@@ -139,12 +144,12 @@ class Graph {
             for ( let j = 0; j < this.#nodes[i].edges.length; j++ ) {
                 
                 if ( this.#nodes[i].edges[j] == nodeID ) {
-                    
                     this.#nodes[i].edges.splice(j,1);
                 }
             }
         }
         delete this.#nodes[nodeID];
+        this.#n -= 1;
     }
 
     getEdges(node) {
@@ -177,40 +182,58 @@ class Graph {
      * Searches for the destination node from the source node via BFS.
      * Updates the graph dynamically as the search is performed.
      * 
+     * First element of the Array is an Array which contains a valid path to
+     * the destination. Second element of the Array contains the number of steps
+     * taken by BFS to locate the destination node.
+     * 
      * @param {Number} source 
      * @param {Number} destination 
-     * @returns {Number} Number of nodes visited to find the destination. -1 if not found
+     * @returns {Array} Path and number of steps taken
+     * 
      */
     bfs(source, destination) {
-        let found = false;
-        const queue = [source];
-        const visited = {};
-        let steps = 1;
+        let queue = [];
+        let visited   = new Array(this.#n);
+        let distances = new Array(this.#n);
+        let parents   = new Array(this.#n);
 
-        while ( queue.length ) {
-            let current = queue.shift();
-            if ( visited[current] ) {
-                continue;
-            }
+        visited.fill(false);
 
-            if ( current === destination ) {
-                found = true;
-                break;
-            }
+        queue.push(source);
+        visited[source] = true;
 
-            visited[current] = true;
-            steps++;
-            let neighbor = this.#nodes[current].edges;
-            for ( let i = 0; i < neighbor.length; i++ ) {
-                queue.push(neighbor[i]);
+        parents[source] = -1;
+        while( queue.length != 0 ) {
+            let v = queue.shift();
+            // console.log("Q: ", queue);
+            // console.log("v: ", v);
+
+            let numNeighbors = this.#nodes[v].edges.length;
+            for ( let i = 0; i < numNeighbors; i++ ) {
+                let u = this.#nodes[v].edges[i];
+
+                if ( visited[u] == false ) {
+                    visited[u] = true;
+                    queue.push(u);
+                    distances[u] = distances[v] + 1;
+                    parents[u] = v;
+                }
             }
         }
 
-        if ( !found ) {
-            return -1;
+        
+        if ( visited[destination] == false ) {
+            console.log("No path!\n");
+            return [-1];
         }
-
-        return steps;
+        else {
+            let path = [];
+            for ( let v = destination; v != -1; v = parents[v] ) {
+                path.push(v);
+            }
+            path.reverse();
+            return path;
+        }
     }
 
     dfs(source, destination, visited = {} ) {
@@ -236,15 +259,13 @@ class Graph {
 
     /**
      * Solves the Water Jug problem using BFS
+     * Returns the path taken to reach the final state along with
+     * the number of steps it took BFS to reach the final state
      * 
      * @param {Array} finalState 
-     * @return {Number} Number of Steps taken to reach the final state
+     * @return {Number} Solution
      */
     solveBFS(finalState) {
-        let path = [];
-        
-        let initialState = [0,0];
-
         let source = 0;
         let destination = this.isStatePresent(finalState);
 
@@ -253,9 +274,8 @@ class Graph {
             return -1;
         }
 
-        let steps = this.bfs(source, destination);
-
-        return steps;
+        let solution = this.bfs(source, destination);
+        return solution;
     }
 }
 
@@ -480,15 +500,15 @@ graph.displayGraph();
 
 // It turns out that some states just cannot be reached. They'll be present in statesToBeAdded
 console.log("Impossible States:", statesToBeAdded);
+console.log("\n\n");
 
 
 // Final states
 let finalState = [2,0]
 
-
-graph.solveBFS(finalState);
-
-graph.bfs()
+let steps = graph.solveBFS(finalState);
+console.log("Steps:", steps);
+// graph.bfs()
 
 
 console.log("Reached the end");
