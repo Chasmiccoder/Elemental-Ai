@@ -130,16 +130,16 @@ class Graph {
         console.log(this.#nodes);
     }
 
-    
     deleteNode(nodeID) {
         /*
         First deletes the edges in other nodes that are connected to the node to be deleted
         then deletes the node to be deleted
         */
 
-        let N = Object.keys(this.#nodes).length; // number of nodes in the graph
+        // let N = Object.keys(this.#nodes).length; // number of nodes in the graph
 
-        for( let i = 0; i < N; i++ ) {
+
+        for( let i = 0; i < this.#n; i++ ) {
             
             for ( let j = 0; j < this.#nodes[i].edges.length; j++ ) {
                 
@@ -166,8 +166,8 @@ class Graph {
      */
     isStatePresent(state) {
         
-        let N = Object.keys(this.#nodes).length; // number of nodes in the graph
-        for ( let i = 0; i < N; i++ ) {
+        // let N = Object.keys(this.#nodes).length; // number of nodes in the graph
+        for ( let i = 0; i < this.#n; i++ ) {
             
             // If the state is present in the graph
             if ( this.#nodes[i].state[0] == state[0] && this.#nodes[i].state[1] == state[1] ) {
@@ -182,10 +182,6 @@ class Graph {
      * Searches for the destination node from the source node via BFS.
      * Updates the graph dynamically as the search is performed.
      * 
-     * First element of the Array is an Array which contains a valid path to
-     * the destination. Second element of the Array contains the number of steps
-     * taken by BFS to locate the destination node.
-     * 
      * @param {Number} source 
      * @param {Number} destination 
      * @returns {Array} Path and number of steps taken
@@ -197,6 +193,10 @@ class Graph {
         let distances = new Array(this.#n);
         let parents   = new Array(this.#n);
 
+        // steps is the number of nodes BFS visited in order to reach the destination node (excluding the source node)
+        // it is a measure of how effective the particular searching algorithm is for that problem
+        let steps = 0;
+
         visited.fill(false);
 
         queue.push(source);
@@ -205,8 +205,6 @@ class Graph {
         parents[source] = -1;
         while( queue.length != 0 ) {
             let v = queue.shift();
-            // console.log("Q: ", queue);
-            // console.log("v: ", v);
 
             let numNeighbors = this.#nodes[v].edges.length;
             for ( let i = 0; i < numNeighbors; i++ ) {
@@ -214,6 +212,7 @@ class Graph {
 
                 if ( visited[u] == false ) {
                     visited[u] = true;
+                    steps++;
                     queue.push(u);
                     distances[u] = distances[v] + 1;
                     parents[u] = v;
@@ -221,10 +220,9 @@ class Graph {
             }
         }
 
-        
         if ( visited[destination] == false ) {
             console.log("No path!\n");
-            return [-1];
+            return {};
         }
         else {
             let path = [];
@@ -232,7 +230,7 @@ class Graph {
                 path.push(v);
             }
             path.reverse();
-            return path;
+            return {"path" : path, "steps" : steps};
         }
     }
 
@@ -258,7 +256,7 @@ class Graph {
     }
 
     /**
-     * Solves the Water Jug problem using BFS
+     * Solves the Water Jug problem using Breadth First Search
      * Returns the path taken to reach the final state along with
      * the number of steps it took BFS to reach the final state
      * 
@@ -274,18 +272,28 @@ class Graph {
             return -1;
         }
 
-        let solution = this.bfs(source, destination);
-        return solution;
+        return this.bfs(source, destination);
+    }
+
+
+    /**
+     * Solves the Water Jug problem using Depth First Search
+     * Returns the path taken to reach the final state along with
+     * the number of steps it took DFS to reach the final state
+     * 
+     * @param {Array} finalState 
+     * @return {Number} Solution
+     */
+    solveDFS(finalState) {
+        
+
     }
 }
 
-
+// optimize this function, make it smaller and generalize it for n jugs (right now supports only 2 jugs)
 function makeMove(state, move) {
     // making a copy of the original state
     newState = [...state]; 
-
-    // console.log("ENTERING ", move);
-    // console.log("Old State:", state);
 
     // Empty Jug A
     if ( move == 0 ) {
@@ -491,10 +499,6 @@ console.log("States to be Added: ", statesToBeAdded);
 
 generateGraph(graph, [0,0], 0);
 
-
-
-
-
 console.log("State Space Graph:");
 graph.displayGraph();
 
@@ -506,14 +510,32 @@ console.log("\n\n");
 // Final states
 let finalState = [2,0]
 
-let steps = graph.solveBFS(finalState);
-console.log("Steps:", steps);
-// graph.bfs()
+let solutionBFS = graph.solveBFS(finalState);
+
+console.log("Steps BFS:", solutionBFS["steps"]);
+console.log("\nSolution Path BFS: ", solutionBFS["path"]);
 
 
-console.log("Reached the end");
+let solutionDFS = graph.solveDFS(finalState);
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+console.log("\nReached the end");
 
 
 
@@ -522,4 +544,3 @@ console.log("Reached the end");
 
 Use shortest distance code from approach 2
 */
-
