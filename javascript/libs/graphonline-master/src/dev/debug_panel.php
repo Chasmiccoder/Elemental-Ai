@@ -1,4 +1,0 @@
-<?php
-
-    $debug = new DebugPanel();
-?>
