@@ -2,9 +2,9 @@
 AI based problem solver with a clean GUI that solves some of the most famous puzzles and problems out there!
 
 
+Using Dracula.js to plot graphs
 
 
-Will need this to understand how to display the graph and the animation during the search algo
 
 <!-- 
 Reference Links:
