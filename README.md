@@ -16,16 +16,18 @@ Use defaults
 
 npm install lodash jquery --save
 
-Then write the code in a folder called dist, in a file names bundle.js
-Then create an empty file bundle.js in the root folder, and run this command
+Then write the code in a file named bundle.js in the root directory
+Then create an empty file bundle.js in the dist folder, and run this command
 
-browserify dist/bundle.js -o bundle.js
+browserify bundle.js -o dist/bundle.js
 
 Now, bundle.js in the root folder has the code from dist/bundle.js and the required code from lodash and jquery
 
 Do the same, but for Dracula js
 
-
+Things done during Dracula Trial Run:
+npm install --save graphdracula raphael
+browserify bundle.js -o dist/bundle.js
 
 Reference Links:
 https://stackoverflow.com/questions/7034/graph-visualization-library-in-javascript
