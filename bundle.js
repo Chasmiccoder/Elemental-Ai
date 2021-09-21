@@ -16,4 +16,6 @@ var layout = new Layout(graph)
 var renderer = new Renderer('#paper', graph, 400, 300)
 renderer.draw()
 
+console.log("BRO working");
+
 // module.exports = function (n) { return n * 111 }
