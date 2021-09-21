@@ -1,0 +1,23 @@
+{
+  "name": "elemental-ai",
+  "version": "1.0.0",
+  "description": "AI based problem solver with a clean GUI that solves some of the most famous puzzles and problems out there!",
+  "main": "Everythingapp.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Chasmiccoder/Elemental-Ai.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Chasmiccoder/Elemental-Ai/issues"
+  },
+  "homepage": "https://github.com/Chasmiccoder/Elemental-Ai#readme",
+  "dependencies": {
+    "jquery": "^3.6.0",
+    "lodash": "^4.17.21"
+  }
+}

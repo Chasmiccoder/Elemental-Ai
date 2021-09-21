@@ -1,4 +1,11 @@
 /*
+What is wrong with this approach?
+We are generating the state space beforehand.
+In a real world scenario, we'll have to generate the state space as
+we use the searching technique. Change this to account for that later
+
+
+
 Concept -
 =========
 Generate all possible states from the root state ( initial state = [0,0] )
