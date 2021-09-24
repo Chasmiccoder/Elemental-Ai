@@ -25,7 +25,6 @@ console.log("BRO working");
 
 const { stringify } = require("uuid");
 
-
 // from Lab2 Water Jug Problem Approach 3:
 class Graph {
     #nodes;
@@ -135,7 +134,7 @@ class Graph {
      * @returns {Array} Path and number of steps taken
      * 
      */
-    bfs(source, destination) {
+    async bfs(source, destination) {
         let queue = [];
         let visited   = new Array(this.#n);
         let distances = new Array(this.#n);
@@ -149,7 +148,14 @@ class Graph {
 
         queue.push(source);
         visited[source] = true;
-        g.addNode( JSON.stringify([0,0]) );
+        graphDraw.addNode( JSON.stringify([0,0]) );
+
+        await new Promise(r => setTimeout(r, 2000));
+        // sleep(5000).then(() => {
+        //     renderer.draw();
+        // });
+        renderer.draw();
+       
 
         parents[source] = -1;
         while( queue.length != 0 ) {
@@ -161,8 +167,8 @@ class Graph {
 
                 if ( visited[u] == false ) {
                     visited[u] = true;
-                    g.addNode( JSON.stringify(this.#nodes[u].state) );
-                    g.addEdge( JSON.stringify(this.#nodes[u].state), 
+                    graphDraw.addNode( JSON.stringify(this.#nodes[u].state) );
+                    graphDraw.addEdge( JSON.stringify(this.#nodes[u].state), 
                                JSON.stringify(this.#nodes[v].state) );
                     
                     steps++;
@@ -242,6 +248,11 @@ class Graph {
         
 
     }
+}
+
+// For the animation
+function sleep (time) {
+    return new Promise((resolve) => setTimeout(resolve, time));
 }
 
 // optimize this function, make it smaller and generalize it for n jugs (right now supports only 2 jugs)
@@ -413,70 +424,27 @@ function generateGraph(graph, state, stateID) {
     }
 }
 
-
-
-/*
-
-Main
-====
-
-
-*/
-
-
-
-
-
-
-
 function justSolveIt() {
-    let graph = new Graph();
 
-    graph.addNode(0, [0,0]);
-
-    var numberOfMoves = 6;
-    var nodeID = 0;
-    var capacity = [4,3];
-
-    // contains all possible states that need to be present in the tree.
-    var statesToBeAdded = generateAllStates(capacity);
-
-
-    deleteState(statesToBeAdded, [0,0]);
-
-    console.log("States to be Added: ", statesToBeAdded);
-
-    generateGraph(graph, [0,0], 0);
-
-    console.log("State Space Graph:");
-    graph.displayGraph();
-
-    // It turns out that some states just cannot be reached. They'll be present in statesToBeAdded
-    console.log("Impossible States:", statesToBeAdded);
-    console.log("\n\n");
-
-
+    console.log("Executed my boii!!");
+    // alert("Reached, my boi");
+    
     // Final states
-    let finalState = [2,0]
+    let finalState = [2,0];
 
     let solutionBFS = graph.solveBFS(finalState);
 
     console.log("Steps BFS:", solutionBFS["steps"]);
     console.log("\nSolution Path BFS: ", solutionBFS["path"]);
 
-    var layout = new Layout(graph)
-    var renderer = new Renderer('#paper', graph, 400, 300)
-    renderer.draw()
+    
+    // renderer.draw()
 
     console.log("BRO working");
 
-
     // let solutionDFS = graph.solveDFS(finalState);
 
-
 }
-
-
 
 
 // globals:
@@ -486,7 +454,39 @@ var Graph2 = Dracula.Graph
 var Renderer = Dracula.Renderer.Raphael
 var Layout = Dracula.Layout.Spring
 
-var g = new Graph2();
+// Graph to be drawn (Dracula object)
+var graphDraw = new Graph2();
+
+// Graph involved in actual computation. My Graph Object
+let graph = new Graph();
+graph.addNode(0, [0,0]);
+
+var numberOfMoves = 6;
+var nodeID = 0;
+var capacity = [4,3];
+
+// contains all possible states that need to be present in the tree.
+var statesToBeAdded = generateAllStates(capacity);
+
+
+deleteState(statesToBeAdded, [0,0]);
+
+console.log("States to be Added: ", statesToBeAdded);
+
+generateGraph(graph, [0,0], 0);
+
+console.log("State Space Graph:");
+graph.displayGraph();
+
+// It turns out that some states just cannot be reached. They'll be present in statesToBeAdded
+console.log("Impossible States:", statesToBeAdded);
+console.log("\n\n");
+
+var layout = new Layout(graphDraw);
+var renderer = new Renderer('#paper', graphDraw, 400, 300);
+
+document.getElementById("solveID").addEventListener("click", justSolveIt);
+
 
 
 
