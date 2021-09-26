@@ -79,9 +79,6 @@ class Graph {
         then deletes the node to be deleted
         */
 
-        // let N = Object.keys(this.#nodes).length; // number of nodes in the graph
-
-
         for( let i = 0; i < this.#n; i++ ) {
             
             for ( let j = 0; j < this.#nodes[i].edges.length; j++ ) {
@@ -120,9 +117,7 @@ class Graph {
         return -1;
     }
 
-    // getStateFromNodeID(nodeID) {
-
-    // }
+    // getStateFromNodeID(nodeID) {}
 
 
     /**
@@ -149,23 +144,7 @@ class Graph {
         queue.push(source);
         visited[source] = true;
 
-        // new approach
-        // var layout = new Layout(graph)
-        // var renderer = new Renderer('#paper', graph, 400, 300)
-
-        
-
-
         graphDraw.addNode( JSON.stringify([0,0]) );
-
-        // renderer.draw();
-
-        // await new Promise(r => setTimeout(r, 2000));
-        // sleep(5000).then(() => {
-        //     renderer.draw();
-        // });
-        // renderer.draw();
-       
 
         parents[source] = -1;
         while( queue.length != 0 ) {
@@ -189,9 +168,7 @@ class Graph {
                                         label: 'Label'
                                    }
                                } );
-
-                    // renderer.draw();
-                    
+   
                     steps++;
                     queue.push(u);
                     distances[u] = distances[v] + 1;
@@ -269,11 +246,6 @@ class Graph {
         
 
     }
-}
-
-// For the animation
-function sleep (time) {
-    return new Promise((resolve) => setTimeout(resolve, time));
 }
 
 // optimize this function, make it smaller and generalize it for n jugs (right now supports only 2 jugs)
@@ -448,26 +420,25 @@ function generateGraph(graph, state, stateID) {
 function justSolveIt() {
 
     console.log("Executed my boii!!");
+
+    
     // alert("Reached, my boi");
     
     // Final states
     let finalState = [2,0];
+    // let finalState = [3,0];
 
     let solutionBFS = graph.solveBFS(finalState);
 
     console.log("Steps BFS:", solutionBFS["steps"]);
     console.log("\nSolution Path BFS: ", solutionBFS["path"]);
 
-    // var layouter = new Graph2.Layout.Spring(graphDraw);
-    // layouter.layout();
-
     var layouter = new Layout(graphDraw);
     layouter.layout();
 
-    
+
     var renderer = new Renderer('#paper', graphDraw, 600, 600);
     renderer.draw();
-
     
     // let solutionDFS = graph.solveDFS(finalState);
 
@@ -475,15 +446,11 @@ function justSolveIt() {
 
 
 // globals:
-var Dracula = require('graphdracula')
+var Dracula = require('graphdracula');
 
 var Graph2 = Dracula.Graph
 var Renderer = Dracula.Renderer.Raphael
 var Layout = Dracula.Layout.Spring
-
-
-
-
 
 
 // Graph to be drawn (Dracula object)
@@ -496,6 +463,7 @@ graph.addNode(0, [0,0]);
 var numberOfMoves = 6;
 var nodeID = 0;
 var capacity = [4,3];
+// var capacity = [6,4];
 
 // contains all possible states that need to be present in the tree.
 var statesToBeAdded = generateAllStates(capacity);
@@ -514,30 +482,7 @@ graph.displayGraph();
 console.log("Impossible States:", statesToBeAdded);
 console.log("\n\n");
 
-/* OLD
-// var layout = new Layout(graphDraw);
-var renderer = new Renderer('#paper', graphDraw, 800, 600);
-
-// New Array-type approach
-// var layouts   = []; 
-var renderers = []; 
-*/
-
-// RaphaelJS thing
-/* draw the graph using the RaphaelJS draw implementation */
-// var renderer = new Graph2.Renderer.Raphael('canvas', graphDraw, 800, 600);
-
-
-
-
-
-
 document.getElementById("solveID").addEventListener("click", justSolveIt);
-
-
-
-
-
 
 
 
