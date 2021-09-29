@@ -10,8 +10,10 @@ https://react-d3-library.github.io/
 https://github.com/anvaka/VivaGraphJS/blob/master/docs/graph_intro.md
 
 
-Need to generalize Water Jug Problem with N jugs instead of 2
-Write better comments
+* Need to generalize Water Jug Problem with N jugs instead of 2
+* Write better comments
+* Put graph definition in a separate JS file 
+    (will have to change functions like isStatePresent since they are problem specific)
 
 
 

@@ -3,6 +3,7 @@
 Problem Statement -
 ===================
 
+Transport 3 Missionaries and 3 Cannibals from Left to Right
 
 
 State Space Graph Generation -
@@ -33,25 +34,17 @@ more than once.
 Possible Operations -
 =====================
 
-    1) Empty Jug A
-    
-    2) Empty Jug B
-    
-    3) Fill Jug A
-    
-    4) Fill Jug B
-
-    5) Pour Contents of A in B
-
-    6) Pour Contents of B in A
+???
 
 
 Variable Information -
 ======================
 
-states - [l1, l2]
-An array of 2 elements with the number of litres of water in each of the two jugs
-
+states - [M,C,B]
+An array of 3 elements
+M = Number of Missionaries on the Left Hand Side {0,1,2,3}
+C = Number of Cannibals on the Left Hand Side {0,1,2,3}
+B = Where the boat currently is {'Left Bank', 'Right Bank'}
 
 Searching Algorithms -
 ======================
@@ -147,8 +140,8 @@ class Graph {
         
         for ( let i = 0; i < this.#n; i++ ) {
             
-            // If the state is present in the graph (specific to the Water Jug problem)
-            if ( this.#nodes[i].state[0] == state[0] && this.#nodes[i].state[1] == state[1] ) {
+            // If the state is present in the graph (specific to the Missionaries and Cannibals problem)
+            if ( this.#nodes[i].state[0] == state[0] && this.#nodes[i].state[1] == state[1] && this.#nodes[i].state[2] == state[2] ) {
                 return i;
             }
         }
@@ -284,7 +277,8 @@ class Graph {
     }
 }
 
-// optimize this function, make it smaller and generalize it for n jugs (right now supports only 2 jugs)
+
+// optimize this function, make it smaller and generalize it for N Missionaries and M Cannibals
 function makeMove(state, move) {
     // making a copy of the original state
     newState = [...state]; 
@@ -364,151 +358,3 @@ function makeMove(state, move) {
 
     return newState;
 }
-
-function generateAllStates(capacity) {
-    /*
-    Number of possible states for jugs of capacity 4 and 3 is:
-    (4+1) * (3+1)
-    */
-
-    let array = [];
-    for( let i = 0; i <= capacity[0]; i++ ) {
-        for ( let j = 0; j <= capacity[1]; j++ ) {
-            let newState = [i,j];
-            array.push(newState);
-        }
-    }
-
-    return array;
-}
-
-/** 
- * Deletes an element from an array of states by value
- * 
-*/
-function deleteState(list, state) {
-    
-    for ( let i = 0; i < list.length; i++ ) {
-        if ( list[i][0] === state[0] && list[i][1] == state[1] ) {
-            list.splice(i, 1);
-        }
-    }
-}
-
-/**
- * Generates the required solution state space graph starting from the intial state [0,0]
- * Function terminates when all states that can be generated have been generated and all possible
- * paths have been recorded in the graph
- * 
- * @param {*} graph 
- * @param {*} state 
- * @param {*} stateID 
- * @returns 
- */
-function generateGraph(graph, state, stateID) {
-    /*
-    
-    */
-
-    // if all possible states have been generated, exit the function
-    if ( statesToBeAdded.length == 0 ) {
-        return;
-    }
-
-    for ( let i = 0; i < numberOfMoves; i++ ) {
-
-        let newState = makeMove(state, i);
-
-        // don't consider the newly generated state if it is the same as the previous one
-        // { remove first condition of [0,0] }
-        if ( state[0] == newState[0] && state[1] == newState[1] ) {
-            continue;
-        }
-
-        let newNodeID = graph.isStatePresent(newState);
-        
-        // if the generated state is already in the graph, just add an edge between the parent and the found state
-        if ( newNodeID != -1 ) {
-
-            // addEdge() adds an edge only if the edge is not present. If it was not present, didAdd becomes false
-            // else it is true
-            
-            let didAdd = graph.addEdge(stateID, newNodeID);
-
-            // this key condition helps terminate all the recursive calls
-            if ( didAdd == true ) {
-                generateGraph(graph, newState, newNodeID);
-            }
-        }
-        
-        // node not found, generate a new one
-        else {
-            nodeID += 1;
-            graph.addNode(nodeID, newState);
-
-            graph.addEdge(stateID, nodeID);
-            deleteState(statesToBeAdded, newState);
-            
-            generateGraph(graph, newState, nodeID);
-        }
-    }
-}
-
-function justSolveIt() {
-
-    let finalState = [2,0];
-    // let finalState = [3,0];
-
-    let solutionBFS = graph.solveBFS(finalState);
-
-    console.log("Steps BFS:", solutionBFS["steps"]);
-    console.log("\nSolution Path BFS: ", solutionBFS["path"]);
-
-    var layouter = new Layout(graphDraw);
-    layouter.layout();
-
-    var renderer = new Renderer('#paper', graphDraw, 600, 600);
-    renderer.draw();
-    
-}
-
-
-// globals:
-var Dracula = require('graphdracula');
-
-var Graph2 = Dracula.Graph
-var Renderer = Dracula.Renderer.Raphael
-var Layout = Dracula.Layout.Spring
-
-// Graph to be drawn (Dracula object)
-var graphDraw = new Graph2();
-
-// Graph involved in actual computation. My Graph Object
-let graph = new Graph();
-graph.addNode(0, [0,0]);
-
-var numberOfMoves = 6;
-var nodeID = 0;
-var capacity = [4,3];
-// var capacity = [6,4];
-
-// contains all possible states that need to be present in the tree.
-var statesToBeAdded = generateAllStates(capacity);
-
-deleteState(statesToBeAdded, [0,0]);
-
-console.log("States to be Added: ", statesToBeAdded);
-
-generateGraph(graph, [0,0], 0);
-
-console.log("State Space Graph:");
-graph.displayGraph();
-
-// It turns out that some states just cannot be reached. They'll be present in statesToBeAdded
-console.log("Impossible States:", statesToBeAdded);
-console.log("\n\n");
-
-document.getElementById("solveID").addEventListener("click", justSolveIt);
-
-
-console.log("\nReached the end");

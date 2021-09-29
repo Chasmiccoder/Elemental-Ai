@@ -64,10 +64,6 @@ This code is Licensed under the MIT Licence
 ---------------------------------------------
 */
 
-
-// const { stringify } = require("uuid"); // MAY NOT BE NEEDED
-
-// from Lab2 Water Jug Problem Approach 3:
 class Graph {
     #nodes;
     #n; // number of nodes
@@ -205,7 +201,7 @@ class Graph {
                                    style: {
                                         stroke: '#bfa',
                                         fill: '#56f',
-                                        label: 'Label'
+                                       // label: 'Label'
                                    }
                                } );
    
@@ -363,8 +359,6 @@ function makeMove(state, move) {
         console.log( state );
         console.log( "Move Number:" );
         console.log( move );
-        //Use process.exit(0); in nodeJS. Learn NodeJS
-        // Put this whole thing in 1 line
     }
 
     return newState;
@@ -388,13 +382,10 @@ function generateAllStates(capacity) {
 }
 
 /** 
- * Function explanation
+ * Deletes an element from an array of states by value
+ * 
 */
 function deleteState(list, state) {
-    /*
-    Deletes an element from an array, by value
-    Deletes a state from a list of states
-    */
     
     for ( let i = 0; i < list.length; i++ ) {
         if ( list[i][0] === state[0] && list[i][1] == state[1] ) {
@@ -403,13 +394,19 @@ function deleteState(list, state) {
     }
 }
 
-
-// start this by calling generateGraph(graph, [0,0])
-// Generates the required solution tree / the entire state space starting from the intial state [0,0] 
+/**
+ * Generates the required solution state space graph starting from the intial state [0,0]
+ * Function terminates when all states that can be generated have been generated and all possible
+ * paths have been recorded in the graph
+ * 
+ * @param {*} graph 
+ * @param {*} state 
+ * @param {*} stateID 
+ * @returns 
+ */
 function generateGraph(graph, state, stateID) {
     /*
-    Function terminates when all states that can be generated have been generated and all possible
-    paths have been recorded in the graph
+    
     */
 
     // if all possible states have been generated, exit the function
@@ -458,12 +455,6 @@ function generateGraph(graph, state, stateID) {
 
 function justSolveIt() {
 
-    console.log("Executed my boii!!");
-
-    
-    // alert("Reached, my boi");
-    
-    // Final states
     let finalState = [2,0];
     // let finalState = [3,0];
 
@@ -475,12 +466,9 @@ function justSolveIt() {
     var layouter = new Layout(graphDraw);
     layouter.layout();
 
-
     var renderer = new Renderer('#paper', graphDraw, 600, 600);
     renderer.draw();
     
-    // let solutionDFS = graph.solveDFS(finalState);
-
 }
 
 
@@ -490,7 +478,6 @@ var Dracula = require('graphdracula');
 var Graph2 = Dracula.Graph
 var Renderer = Dracula.Renderer.Raphael
 var Layout = Dracula.Layout.Spring
-
 
 // Graph to be drawn (Dracula object)
 var graphDraw = new Graph2();
@@ -507,7 +494,6 @@ var capacity = [4,3];
 // contains all possible states that need to be present in the tree.
 var statesToBeAdded = generateAllStates(capacity);
 
-
 deleteState(statesToBeAdded, [0,0]);
 
 console.log("States to be Added: ", statesToBeAdded);
@@ -522,7 +508,6 @@ console.log("Impossible States:", statesToBeAdded);
 console.log("\n\n");
 
 document.getElementById("solveID").addEventListener("click", justSolveIt);
-
 
 
 console.log("\nReached the end");
