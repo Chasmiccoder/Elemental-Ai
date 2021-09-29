@@ -2,6 +2,14 @@
 AI based problem solver with a clean GUI that solves some of the most famous puzzles and problems out there!
 
 
+### Problems Solved
+
+* Water Jug Problem
+* Missionaries and Cannibals Problem
+
+
+Tech Stack:
+
 Using Dracula.js to plot graphs
 
 
