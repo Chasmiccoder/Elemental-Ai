@@ -1,94 +1,67 @@
 /*
-What is wrong with this approach?
-We are generating the state space beforehand.
-In a real world scenario, we'll have to generate the state space as
-we use the searching technique. Change this to account for that later
 
-
-
-Concept -
-=========
-Generate all possible states from the root state ( initial state = [0,0] )
-The total number of nodes in the graph is finite and small since we'll not explore nodes
-more than once
-
-
-Possible Operations -
-=====================
-Empty Jug A
-Empty Jug B
-Fill Jug A
-Fill Jug B
-
-Pour Contents of A in B: if (amount of water in B < capacity of B) and A can fully fill B and still have water leftover 
-Pour Contents of A in B: if (amount of water in B < capacity of B) and A can fill B until A runs out of water (B still has some empty space)
-
-Pour Contents of B in A: if (amount of water in A < capacity of A) and B can fully fill A and still have water leftover 
-Pour Contents of B in A: if (amount of water in A < capacity of A) and B can fill A until B runs out of water (A still has some empty space)
+Problem Statement -
+===================
 
 
 
 State Space Graph Generation -
 =============================
 
-New searching / exploring logic. First generate a list of all possible states.
-Then generate a new state by making a move. Once the move is made, check if the new state exists in the graph.
+Generate all possible states from the root state ( initial state = [0,0] )
+The total number of nodes in the graph is finite and small since we'll not explore nodes
+more than once.
 
-If the new state is present in the graph, just add an edge between the parent node and the new state's node
-(if such a node is node is not present). If the connection between the parent node and the new state
-is already there, then do ???
+    1) First generate a list of all possible states
 
-If the new state is not present in the graph, generate a new node and add the corresponding edge.
-Call generateGraph() until all the states have been obtained.
-Con of this apprach: If a particular state is not possible, we'll end up in an infinite loop.
-Think of a way to prevent this.
+    2) Then generate a new state by making a legal move 
+    Once the move is made, check if the new state exists in the graph
 
+    3) If the new state is present in the graph, just add an edge between the parent node and the new state's node
+    (if such a node is node is not present)
 
+    4) If the new state is not present in the graph, generate a new node and add the corresponding edge
 
-In the newExplore() function check if the new state belongs to the list of states to be generated.
-If it does, then return false, which means that we have to add the state.
-If it doesn't then return true, because this state has already been added.
-Keep generating the tree until statesToBeAdded becomes empty.
+    5) Call generateGraph() recursively until all the states have been obtained
 
-This new tree generation approach means that we won't need to find the shortest distance, 
-and we won't need smartExplore
-
-
-Notes -
-=======
-
-need to use recursion to generate the graph
-We don't need a graph explicitly to solve the problem, but will need one for the visualization
-
-define previous state
-define set of all moves
-make a move on previous state. Check if the obtained state is legal.
-If legal, officially make the move and recursively solve. Then move on to the next move
-If not legal, don't make that move, go to the next one
+    6) Keep track of the states to be added
+    After adding a new node (state) to the state space graph, remove it from the list that tracks the states to be added
+    If at any point this list becomes empty, then we've generated all possible states
+    After function execution, the list contains all the impossible states
 
 
-Variables
+Possible Operations -
+=====================
+
+    1) Empty Jug A
+    
+    2) Empty Jug B
+    
+    3) Fill Jug A
+    
+    4) Fill Jug B
+
+    5) Pour Contents of A in B
+
+    6) Pour Contents of B in A
+
+
+Variable Information -
+======================
 states - An array of 2 elements with the number of litres of water in each of the two jugs
 
 
-Solving the Water Jug Problem
-We'll first implement the specific searching algorithm. Then, as each node gets 'visited',
-we'll update the graph to change the colour of the visited node.
-At then end, we'll use the shortest path function to highlight the path that the user can take
-to solve the problem.
-At the right hand side display the number of nodes the algorithm had to visit in order to
-reach the final state. This is a measure of how good the searching algo is for that particular problem
+Searching Algorithms -
+======================
 
-1) BFS
+    1) BFS
 
 
-
-ToDo:
-Replace N with #n wherever number of nodes is needed
-
-
+---------------------------------------------
+Author - Aryaman Kolhe
+This code is Licensed under the MIT Licence
+---------------------------------------------
 */
-
 
 class Graph {
     #nodes;
@@ -106,7 +79,7 @@ class Graph {
         };
         this.#n += 1;
     }
-
+    
     addEdge(source, destination, directedGraph = true) {
         // if either node does not exist
         if ( !this.#nodes[source] || !this.#nodes[destination] ) {
@@ -143,9 +116,6 @@ class Graph {
         then deletes the node to be deleted
         */
 
-        // let N = Object.keys(this.#nodes).length; // number of nodes in the graph
-
-
         for( let i = 0; i < this.#n; i++ ) {
             
             for ( let j = 0; j < this.#nodes[i].edges.length; j++ ) {
@@ -173,7 +143,6 @@ class Graph {
      */
     isStatePresent(state) {
         
-        // let N = Object.keys(this.#nodes).length; // number of nodes in the graph
         for ( let i = 0; i < this.#n; i++ ) {
             
             // If the state is present in the graph
@@ -183,6 +152,8 @@ class Graph {
         }
         return -1;
     }
+
+    // getStateFromNodeID(nodeID) {}
 
 
     /**
@@ -209,6 +180,8 @@ class Graph {
         queue.push(source);
         visited[source] = true;
 
+        graphDraw.addNode( JSON.stringify([0,0]) );
+
         parents[source] = -1;
         while( queue.length != 0 ) {
             let v = queue.shift();
@@ -219,6 +192,18 @@ class Graph {
 
                 if ( visited[u] == false ) {
                     visited[u] = true;
+                
+                    graphDraw.addNode( JSON.stringify(this.#nodes[u].state) );
+                    graphDraw.addEdge( JSON.stringify(this.#nodes[u].state), 
+                               JSON.stringify(this.#nodes[v].state), 
+                               {
+                                   style: {
+                                        stroke: '#bfa',
+                                        fill: '#56f',
+                                        label: 'Label'
+                                   }
+                               } );
+   
                     steps++;
                     queue.push(u);
                     distances[u] = distances[v] + 1;
@@ -251,6 +236,7 @@ class Graph {
         }
 
         visited[source] = true;
+
         const neighbors = this.#nodes[source].edges;
 
         for ( let i = 0; i < neighbors.length; i++ ) {
@@ -293,7 +279,6 @@ class Graph {
      */
     solveDFS(finalState) {
         
-
     }
 }
 
@@ -373,8 +358,6 @@ function makeMove(state, move) {
         console.log( state );
         console.log( "Move Number:" );
         console.log( move );
-        //Use process.exit(0); in nodeJS. Learn NodeJS
-        // Put this whole thing in 1 line
     }
 
     return newState;
@@ -398,13 +381,10 @@ function generateAllStates(capacity) {
 }
 
 /** 
- * Function explanation
+ * Deletes an element from an array of states by value
+ * 
 */
 function deleteState(list, state) {
-    /*
-    Deletes an element from an array, by value
-    Deletes a state from a list of states
-    */
     
     for ( let i = 0; i < list.length; i++ ) {
         if ( list[i][0] === state[0] && list[i][1] == state[1] ) {
@@ -413,13 +393,19 @@ function deleteState(list, state) {
     }
 }
 
-
-// start this by calling generateGraph(graph, [0,0])
-// Generates the required solution tree / the entire state space starting from the intial state [0,0] 
+/**
+ * Generates the required solution state space graph starting from the intial state [0,0]
+ * Function terminates when all states that can be generated have been generated and all possible
+ * paths have been recorded in the graph
+ * 
+ * @param {*} graph 
+ * @param {*} state 
+ * @param {*} stateID 
+ * @returns 
+ */
 function generateGraph(graph, state, stateID) {
     /*
-    Function terminates when all states that can be generated have been generated and all possible
-    paths have been recorded in the graph
+    
     */
 
     // if all possible states have been generated, exit the function
@@ -466,39 +452,46 @@ function generateGraph(graph, state, stateID) {
     }
 }
 
+function justSolveIt() {
+
+    let finalState = [2,0];
+    // let finalState = [3,0];
+
+    let solutionBFS = graph.solveBFS(finalState);
+
+    console.log("Steps BFS:", solutionBFS["steps"]);
+    console.log("\nSolution Path BFS: ", solutionBFS["path"]);
+
+    var layouter = new Layout(graphDraw);
+    layouter.layout();
+
+    var renderer = new Renderer('#paper', graphDraw, 600, 600);
+    renderer.draw();
+    
+}
 
 
+// globals:
+var Dracula = require('graphdracula');
 
+var Graph2 = Dracula.Graph
+var Renderer = Dracula.Renderer.Raphael
+var Layout = Dracula.Layout.Spring
 
+// Graph to be drawn (Dracula object)
+var graphDraw = new Graph2();
 
-
-
-/*
-
-Main
-====
-
-
-*/
-
-
-
-
-
-
-
-
+// Graph involved in actual computation. My Graph Object
 let graph = new Graph();
-
 graph.addNode(0, [0,0]);
 
 var numberOfMoves = 6;
 var nodeID = 0;
 var capacity = [4,3];
+// var capacity = [6,4];
 
 // contains all possible states that need to be present in the tree.
 var statesToBeAdded = generateAllStates(capacity);
-
 
 deleteState(statesToBeAdded, [0,0]);
 
@@ -513,41 +506,7 @@ graph.displayGraph();
 console.log("Impossible States:", statesToBeAdded);
 console.log("\n\n");
 
-
-// Final states
-let finalState = [2,0]
-
-let solutionBFS = graph.solveBFS(finalState);
-
-console.log("Steps BFS:", solutionBFS["steps"]);
-console.log("\nSolution Path BFS: ", solutionBFS["path"]);
-
-
-let solutionDFS = graph.solveDFS(finalState);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+document.getElementById("solveID").addEventListener("click", justSolveIt);
 
 
 console.log("\nReached the end");
-
-
-
-
-/*
-
-Use shortest distance code from approach 2
-*/

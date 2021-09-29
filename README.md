@@ -8,28 +8,28 @@ Using Dracula.js to plot graphs
 
 <!-- 
 
-Things done during trial run:
-npm install browserify -g
-
+--------------------------------------------------------------------------------
 npm init
-Use defaults
-
-npm install lodash jquery --save
-
-Then write the code in a file named bundle.js in the root directory
-Then create an empty file bundle.js in the dist folder, and run this command
-
-browserify bundle.js -o dist/bundle.js
-
-Now, bundle.js in the root folder has the code from dist/bundle.js and the required code from lodash and jquery
-
-Do the same, but for Dracula js
-
-Things done during Dracula Trial Run:
+npm install browserify -g
 npm install --save graphdracula raphael
-browserify bundle.js -o dist/bundle.js
+
+browserify .\Elemental-Ai\Water_Jug_Problem.js -o javascript/index.js
+--------------------------------------------------------------------------------
+
 
 Reference Links:
+
+Dracula JS
+https://github.com/strathausen/dracula
+https://www.graphdracula.net/documentation/#site-header
+
+Need to watch:
+https://bhrigu.me/post/3-jug-problem-python-code/
+
+BFS:
+https://cp-algorithms.com/graph/breadth-first-search.html
+
+
 https://stackoverflow.com/questions/7034/graph-visualization-library-in-javascript
 https://en.wikipedia.org/wiki/Missionaries_and_cannibals_problem
 https://graphonline.ru/en/
