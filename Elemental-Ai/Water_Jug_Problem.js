@@ -287,7 +287,7 @@ class Graph {
 // optimize this function, make it smaller and generalize it for n jugs (right now supports only 2 jugs)
 function makeMove(state, move) {
     // making a copy of the original state
-    newState = [...state]; 
+    let newState = [...state]; 
 
     // Empty Jug A
     if ( move == 0 ) {

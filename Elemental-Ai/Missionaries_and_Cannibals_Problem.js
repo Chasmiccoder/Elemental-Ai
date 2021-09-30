@@ -281,71 +281,90 @@ class Graph {
 // optimize this function, make it smaller and generalize it for N Missionaries and M Cannibals
 function makeMove(state, move) {
     // making a copy of the original state
-    newState = [...state]; 
+    let newState = [...state];
+    let rightBank = [capacity[0]-newState[0], capacity[1]-newState[1]]
 
-    // Empty Jug A
+    // Move one Missionary from Left to Right if the boat is at the Left Bank and if the new state is legal
     if ( move == 0 ) {
-        newState[0] = 0;
-    }
-    // Empty Jug B
-    else if ( move == 1 ) {
-        newState[1] = 0;
-    }
-    // Fill Jug A
-    else if ( move == 2 ) {
-        newState[0] = capacity[0];
-    }
-    // Fill Jug B
-    else if ( move == 3 ) {
-        newState[1] = capacity[1];
-    }
-
-    // Pour Contents of A in B
-    // Case 1 - A can fully fill B. A may or may not have water left
-    // Case 2 - A will fill B until it runs out of water. B may or may not be full
-    else if ( move == 4 ) {
-
-        // if Jug B is not full
-        if ( newState[1] < capacity[1] ) {
-
-            // case 1
-            if ( capacity[1] - newState[1] < newState[0] ) {
-                // A = A - (3-B), B = 3
-                newState[0] -= capacity[1] - newState[1];
-                newState[1] = capacity[1];
-            }
-            
-            // case 2
-            else {
-                // B = B + A, A = 0
-                newState[1] += newState[0];
-                newState[0] = 0;
-            }
+        if ( newState[2] == "Left Bank" && newState[0] - 1 >= newState[1] && rightBank[0] + 1 >= rightBank[1] ) {
+            newState[0] -= 1;
+            newState[2] = "Right Bank";
         }
-        
     }
 
-    // Pour Contents of B in A
-    // Case 1 - B can fully fill A. B may or may not have water left
-    // Case 2 - B will fill A until it runs out of water. A may or may not be full
-    else if ( move == 5 ) {
+    // Move one Cannibal from the Left to Right
+    if ( move == 1 ) {
+        if ( newState[2] == "Left Bank" && newState[0] >= newState[1] - 1 && rightBank[0] >= rightBank[1] + 1 ) {
+            newState[1] -= 1;
+            newState[2] = "Right Bank";
+        }
+    }
 
-        // if Jug A is not full
-        if ( newState[0] < capacity[0] ) {
+    // Move two Missionaries from the Left to Right
+    if ( move == 2 ) {
+        if ( newState[2] == "Left Bank" && newState[0] - 2 >= newState[1] && rightBank[0] + 2 >= rightBank[1] ) {
+            newState[0] -= 2;
+            newState[2] = "Right Bank";
+        }
+    }
 
-            // case 1
-            if ( capacity[0] - newState[0] < newState[1] ) {
-                // B = B - (4-A), A = 4
-                newState[1] -= capacity[0] - newState[0];
-                newState[0] = capacity[0];
-            }
-            
-            // case 2
-            else {
-                // A = A + B, B = 0
-                newState[0] += newState[1];
-                newState[1] = 0;
-            }
+    // Move two Cannibals from the Left to Right
+    if ( move == 3 ) {
+        if ( newState[2] == "Left Bank" && newState[0] >= newState[1] - 2 && rightBank[0] >= rightBank[1] + 2 ) {
+            newState[1] -= 2;
+            newState[2] = "Right Bank";
+        }
+    }
+
+    // Move one Missionary and one Cannibal from the Left to Right
+    if ( move == 4 ) {
+        // the extra conditions are mathematically not needed if the current state is legal, but putting it there just in case
+        if ( newState[2] == "Left Bank" && newState[0] - 1 >= newState[1] - 1 && rightBank[0] + 1 >= rightBank[1] + 1 ) {
+            newState[0] -= 1;
+            newState[1] -= 1;
+            newState[2] = "Right Bank";
+        }
+    }
+
+    // Move one Missionary from Right to Left
+    if ( move == 5 ) {
+        if ( newState[2] == "Right Bank" && newState[0] + 1 >= newState[1] && rightBank[0] - 1 >= rightBank[1] ) {
+            newState[0] += 1;
+            newState[2] = "Left Bank";
+        }
+    }
+
+    // Move one Cannibal from Right to Left
+    if ( move == 6 ) {
+        if ( newState[2] == "Right Bank" && newState[0] >= newState[1] + 1 && rightBank[0] >= rightBank[1] - 1 ) {
+            newState[1] += 1;
+            newState[2] = "Left Bank";
+        }
+    }
+
+    // Move two Missionaries from Right to Left
+    if ( move == 7 ) {
+        if ( newState[2] == "Right Bank" && newState[0] + 2 >= newState[1] && rightBank[0] - 2 >= rightBank[1] ) {
+            newState[0] += 2;
+            newState[2] = "Left Bank";
+        }
+    }
+
+    // Move two Cannibals from Right to Left
+    if ( move == 6 ) {
+        if ( newState[2] == "Right Bank" && newState[0] >= newState[1] + 2 && rightBank[0] >= rightBank[1] - 2 ) {
+            newState[1] += 2;
+            newState[2] = "Left Bank";
+        }
+    }
+
+    // Move one Missionary and one Cannibal from Right to Left
+    if ( move == 7 ) {
+        // the extra conditions are mathematically not needed if the current state is legal, but putting it there just in case
+        if ( newState[2] == "Right Bank" && newState[0] + 1 >= newState[1] + 1 && rightBank[0] - 1 >= rightBank[1] - 1 ) {
+            newState[0] += 1;
+            newState[1] += 1;
+            newState[2] = "Left Bank";
         }
     }
 
@@ -358,3 +377,14 @@ function makeMove(state, move) {
 
     return newState;
 }
+
+
+var numberOfMoves = 8;
+
+// Here, capacity is an array of two elements [Total_M, Total_C]
+// where Total_M is the total number of Missionaries and Total_C is the total number of Cannibals
+var capacity = [3,3];
+
+
+
+
