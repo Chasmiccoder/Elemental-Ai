@@ -378,7 +378,131 @@ function makeMove(state, move) {
     return newState;
 }
 
+function generateAllStates(capacity) {
+    /*
+    Possible states:
+    <i,j,L> <i,j,R> for all i,j = 0,1,2,3
+    */
 
+    let array = [];
+    for( let i = 0; i <= capacity[0]; i++ ) {
+        for ( let j = 0; j <= capacity[1]; j++ ) {
+            let newStateL = [i,j, "Left Bank"];
+            let newStateR = [i,j, "Right Bank"];
+
+            array.push(newStateL);
+            array.push(newStateR);
+        }
+    }
+
+    return array;
+}
+
+/** 
+ * Deletes an element from an array of states by value
+ * 
+*/
+function deleteState(list, state) {
+    
+    for ( let i = 0; i < list.length; i++ ) {
+        if ( list[i][0] == state[0] && list[i][1] == state[1] && list[i][2] == state[2] ) {
+            list.splice(i, 1);
+        }
+    }
+}
+
+
+/**
+ * Generates the required solution state space graph starting from the intial state [0,0]
+ * Function terminates when all states that can be generated have been generated and all possible
+ * paths have been recorded in the graph
+ * 
+ * @param {*} graph 
+ * @param {*} state 
+ * @param {*} stateID 
+ * @returns 
+ */
+ function generateGraph(graph, state, stateID) {
+
+    // if all possible states have been generated, exit the function
+    if ( statesToBeAdded.length == 0 ) {
+        return;
+    }
+
+    for ( let i = 0; i < numberOfMoves; i++ ) {
+
+        let newState = makeMove(state, i);
+
+        // don't consider the newly generated state if it is the same as the previous one
+        // { remove first condition of [0,0] }
+        if ( state[0] == newState[0] && state[1] == newState[1] && state[2] == newState[2] ) {
+            continue;
+        }
+
+        let newNodeID = graph.isStatePresent(newState);
+        
+        // if the generated state is already in the graph, just add an edge between the parent and the found state
+        if ( newNodeID != -1 ) {
+
+            // addEdge() adds an edge only if the edge is not present. If it was not present, didAdd becomes false
+            // else it is true
+            
+            let didAdd = graph.addEdge(stateID, newNodeID);
+
+            // this key condition helps terminate all the recursive calls
+            if ( didAdd == true ) {
+                generateGraph(graph, newState, newNodeID);
+            }
+        }
+        
+        // node not found, generate a new one
+        else {
+            nodeID += 1;
+            graph.addNode(nodeID, newState);
+
+            graph.addEdge(stateID, nodeID);
+            deleteState(statesToBeAdded, newState);
+            
+            generateGraph(graph, newState, nodeID);
+        }
+    }
+}
+
+
+function justSolveIt() {
+
+    let finalState = [0,0,"Right Bank"];
+
+    let solutionBFS = graph.solveBFS(finalState);
+
+    console.log("Steps BFS:", solutionBFS["steps"]);
+    console.log("\nSolution Path BFS: ", solutionBFS["path"]);
+
+    var layouter = new Layout(graphDraw);
+    layouter.layout();
+
+    var renderer = new Renderer('#paper', graphDraw, 600, 600);
+    renderer.draw();
+}
+
+
+
+// globals:
+var Dracula = require('graphdracula');
+
+var Graph2 = Dracula.Graph
+var Renderer = Dracula.Renderer.Raphael
+var Layout = Dracula.Layout.Spring
+
+// Graph to be drawn (Dracula object)
+var graphDraw = new Graph2();
+
+// Graph involved in actual computation. My Graph Object
+let graph = new Graph();
+graph.addNode(0, [3,3,"Left Bank"]);
+
+
+var nodeID = 0;
 var numberOfMoves = 8;
 
 // Here, capacity is an array of two elements [Total_M, Total_C]
@@ -386,5 +510,23 @@ var numberOfMoves = 8;
 var capacity = [3,3];
 
 
+// contains all possible states that need to be present in the tree.
+var statesToBeAdded = generateAllStates(capacity);
 
+deleteState(statesToBeAdded, [0,0,"Left Bank"]);
+
+console.log("States to be Added: ", statesToBeAdded);
+
+generateGraph(graph, [3,3,"Left Bank"], 0);
+
+console.log("State Space Graph:");
+graph.displayGraph();
+
+// It turns out that some states just cannot be reached. They'll be present in statesToBeAdded
+console.log("Impossible States:", statesToBeAdded);
+console.log("\n\n");
+
+document.getElementById("solveID").addEventListener("click", justSolveIt);
+
+console.log("\nReached the end");
 

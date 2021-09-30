@@ -406,9 +406,6 @@ function deleteState(list, state) {
  * @returns 
  */
 function generateGraph(graph, state, stateID) {
-    /*
-    
-    */
 
     // if all possible states have been generated, exit the function
     if ( statesToBeAdded.length == 0 ) {
