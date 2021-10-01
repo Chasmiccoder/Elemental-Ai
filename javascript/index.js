@@ -49,7 +49,9 @@ Possible Operations -
 
 Variable Information -
 ======================
-states - An array of 2 elements with the number of litres of water in each of the two jugs
+
+states - [l1, l2]
+An array of 2 elements with the number of litres of water in each of the two jugs
 
 
 Searching Algorithms -
@@ -146,7 +148,7 @@ class Graph {
         
         for ( let i = 0; i < this.#n; i++ ) {
             
-            // If the state is present in the graph
+            // If the state is present in the graph (specific to the Water Jug problem)
             if ( this.#nodes[i].state[0] == state[0] && this.#nodes[i].state[1] == state[1] ) {
                 return i;
             }
@@ -154,7 +156,9 @@ class Graph {
         return -1;
     }
 
-    // getStateFromNodeID(nodeID) {}
+    getStateFromNodeID(nodeID) {
+        return this.#nodes[nodeID].state;
+    }
 
 
     /**
@@ -286,7 +290,7 @@ class Graph {
 // optimize this function, make it smaller and generalize it for n jugs (right now supports only 2 jugs)
 function makeMove(state, move) {
     // making a copy of the original state
-    newState = [...state]; 
+    let newState = [...state]; 
 
     // Empty Jug A
     if ( move == 0 ) {
@@ -405,9 +409,6 @@ function deleteState(list, state) {
  * @returns 
  */
 function generateGraph(graph, state, stateID) {
-    /*
-    
-    */
 
     // if all possible states have been generated, exit the function
     if ( statesToBeAdded.length == 0 ) {
@@ -462,6 +463,10 @@ function justSolveIt() {
 
     console.log("Steps BFS:", solutionBFS["steps"]);
     console.log("\nSolution Path BFS: ", solutionBFS["path"]);
+
+    for ( let i = 0; i < solutionBFS["path"].length; i++ ) {
+        console.log(graph.getStateFromNodeID( solutionBFS["path"][i]));
+    }
 
     var layouter = new Layout(graphDraw);
     layouter.layout();

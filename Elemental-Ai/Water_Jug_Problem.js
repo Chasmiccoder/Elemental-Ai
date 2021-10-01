@@ -155,7 +155,9 @@ class Graph {
         return -1;
     }
 
-    // getStateFromNodeID(nodeID) {}
+    getStateFromNodeID(nodeID) {
+        return this.#nodes[nodeID].state;
+    }
 
 
     /**
@@ -460,6 +462,10 @@ function justSolveIt() {
 
     console.log("Steps BFS:", solutionBFS["steps"]);
     console.log("\nSolution Path BFS: ", solutionBFS["path"]);
+
+    for ( let i = 0; i < solutionBFS["path"].length; i++ ) {
+        console.log(graph.getStateFromNodeID( solutionBFS["path"][i]));
+    }
 
     var layouter = new Layout(graphDraw);
     layouter.layout();
