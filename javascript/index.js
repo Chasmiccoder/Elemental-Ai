@@ -4,6 +4,7 @@
 Problem Statement -
 ===================
 
+Transport 3 Missionaries and 3 Cannibals from Left to Right
 
 
 State Space Graph Generation -
@@ -34,25 +35,17 @@ more than once.
 Possible Operations -
 =====================
 
-    1) Empty Jug A
-    
-    2) Empty Jug B
-    
-    3) Fill Jug A
-    
-    4) Fill Jug B
-
-    5) Pour Contents of A in B
-
-    6) Pour Contents of B in A
+???
 
 
 Variable Information -
 ======================
 
-states - [l1, l2]
-An array of 2 elements with the number of litres of water in each of the two jugs
-
+states - [M,C,B]
+An array of 3 elements
+M = Number of Missionaries on the Left Hand Side {0,1,2,3}
+C = Number of Cannibals on the Left Hand Side {0,1,2,3}
+B = Where the boat currently is {'Left Bank', 'Right Bank'}
 
 Searching Algorithms -
 ======================
@@ -148,8 +141,8 @@ class Graph {
         
         for ( let i = 0; i < this.#n; i++ ) {
             
-            // If the state is present in the graph (specific to the Water Jug problem)
-            if ( this.#nodes[i].state[0] == state[0] && this.#nodes[i].state[1] == state[1] ) {
+            // If the state is present in the graph (specific to the Missionaries and Cannibals problem)
+            if ( this.#nodes[i].state[0] == state[0] && this.#nodes[i].state[1] == state[1] && this.#nodes[i].state[2] === state[2] ) {
                 return i;
             }
         }
@@ -185,19 +178,26 @@ class Graph {
         queue.push(source);
         visited[source] = true;
 
-        graphDraw.addNode( JSON.stringify([0,0]) );
+        graphDraw.addNode( JSON.stringify([3,3,'Left Bank']) );
+        let flag = 0;
 
         parents[source] = -1;
-        while( queue.length != 0 ) {
+        whileLoop: while( queue.length != 0 ) {
             let v = queue.shift();
 
             let numNeighbors = this.#nodes[v].edges.length;
             for ( let i = 0; i < numNeighbors; i++ ) {
                 let u = this.#nodes[v].edges[i];
 
+                // console.log("test param1:", graph.getStateFromNodeID(u));
+                // console.log("test param2:", u);
+                if(JSON.stringify([0,1,'Left Bank']) == JSON.stringify(graph.getStateFromNodeID(u))) {
+                    console.log("WE REACHED. BIG PROBLEM");
+                }
+
                 if ( visited[u] == false ) {
                     visited[u] = true;
-                
+                    
                     graphDraw.addNode( JSON.stringify(this.#nodes[u].state) );
                     graphDraw.addEdge( JSON.stringify(this.#nodes[u].state), 
                                JSON.stringify(this.#nodes[v].state), 
@@ -214,7 +214,21 @@ class Graph {
                     distances[u] = distances[v] + 1;
                     parents[u] = v;
                 }
+
+                //changed to finalState instead of hard coding [0,0,"RB"]
+                if(JSON.stringify([0,0,'Right Bank']) == JSON.stringify(graph.getStateFromNodeID(u))) {
+                    console.log("WE REACHED AGAIN");
+                    break whileLoop;
+                }
+
+
+               
             }
+
+            // if ( flag == 1 ) {
+            //     break;
+            // }
+
         }
 
         if ( visited[destination] == false ) {
@@ -287,74 +301,130 @@ class Graph {
     }
 }
 
-// optimize this function, make it smaller and generalize it for n jugs (right now supports only 2 jugs)
+
+// optimize this function, make it smaller and generalize it for N Missionaries and M Cannibals
 function makeMove(state, move) {
     // making a copy of the original state
-    let newState = [...state]; 
+    let newState = [...state];
 
-    // Empty Jug A
+    // let capacity = [3,3]; // remove this line later
+
+    let rightBank = [capacity[0]-newState[0], capacity[1]-newState[1]];
+
+    // Move one Missionary from Left to Right if the boat is at the Left Bank and if the new state is legal
     if ( move == 0 ) {
-        newState[0] = 0;
-    }
-    // Empty Jug B
-    else if ( move == 1 ) {
-        newState[1] = 0;
-    }
-    // Fill Jug A
-    else if ( move == 2 ) {
-        newState[0] = capacity[0];
-    }
-    // Fill Jug B
-    else if ( move == 3 ) {
-        newState[1] = capacity[1];
-    }
-
-    // Pour Contents of A in B
-    // Case 1 - A can fully fill B. A may or may not have water left
-    // Case 2 - A will fill B until it runs out of water. B may or may not be full
-    else if ( move == 4 ) {
-
-        // if Jug B is not full
-        if ( newState[1] < capacity[1] ) {
-
-            // case 1
-            if ( capacity[1] - newState[1] < newState[0] ) {
-                // A = A - (3-B), B = 3
-                newState[0] -= capacity[1] - newState[1];
-                newState[1] = capacity[1];
-            }
-            
-            // case 2
-            else {
-                // B = B + A, A = 0
-                newState[1] += newState[0];
-                newState[0] = 0;
-            }
+        if ( newState[2] === "Left Bank" && (newState[0] - 1 >= newState[1] || newState[0]-1 == 0)
+                && (rightBank[0] + 1 >= rightBank[1] || rightBank[0] == 0) 
+                && newState[0]-1 <= capacity[0] && newState[1] <= capacity[1] && rightBank[0]+1 <= capacity[0] && rightBank[1] <= capacity[1]
+            ) {
+            newState[0] -= 1;
+            newState[2] = "Right Bank";
         }
-        
     }
 
-    // Pour Contents of B in A
-    // Case 1 - B can fully fill A. B may or may not have water left
-    // Case 2 - B will fill A until it runs out of water. A may or may not be full
+    // Move one Cannibal from the Left to Right
+    else if ( move == 1 ) {
+        // console.log("BOI: ", newState);
+        // console.log("done\n");
+        if ( newState[2] === "Left Bank" && (newState[0] >= newState[1] - 1 || newState[0] == 0) 
+                && (rightBank[0] >= rightBank[1] + 1 || rightBank[0] == 0) 
+                && newState[0] <= capacity[0] && newState[1]-1 <= capacity[1] && rightBank[0] <= capacity[0] && rightBank[1]+1 <= capacity[1]
+            ) {
+            newState[1] -= 1;
+            newState[2] = "Right Bank";
+            // console.log("NEEDS TO ENTER THIS");
+        }
+    }
+
+    // Move two Missionaries from the Left to Right
+    else if ( move == 2 ) {
+        if ( newState[2] === "Left Bank" && (newState[0] - 2 >= newState[1] || newState[0]-2 == 0) 
+                && (rightBank[0] + 2 >= rightBank[1] || rightBank[0] == 0) 
+                && newState[0]-2 <= capacity[0] && newState[1] <= capacity[1] && rightBank[0]+2 <= capacity[0] && rightBank[1] <= capacity[1]
+            ) {
+            newState[0] -= 2;
+            newState[2] = "Right Bank";
+        }
+    }
+
+    // Move two Cannibals from the Left to Right
+    else if ( move == 3 ) {
+        if ( newState[2] === "Left Bank" && (newState[0] >= newState[1] - 2 || newState[0] == 0) 
+                && (rightBank[0] >= rightBank[1] + 2 || rightBank[0] == 0) 
+                && newState[0] <= capacity[0] && newState[1]-2 <= capacity[1] && rightBank[0] <= capacity[0] && rightBank[1]+2 <= capacity[1]
+            ) {
+            newState[1] -= 2;
+            newState[2] = "Right Bank";
+        }
+    }
+
+    // Move one Missionary and one Cannibal from the Left to Right
+    else if ( move == 4 ) {
+        // the extra conditions are mathematically not needed if the current state is legal, but putting it there just in case
+        if ( newState[2] === "Left Bank" && (newState[0] - 1 >= newState[1] - 1 || newState[0]-1 == 0) 
+                && (rightBank[0] + 1 >= rightBank[1] + 1 || rightBank[0] == 0) 
+                && newState[0]-1 <= capacity[0] && newState[1]-1 <= capacity[1] && rightBank[0]+1 <= capacity[0] && rightBank[1]+1 <= capacity[1]
+            ) {
+            newState[0] -= 1;
+            newState[1] -= 1;
+            newState[2] = "Right Bank";
+        }
+    }
+
+    // Move one Missionary from Right to Left
     else if ( move == 5 ) {
+        if ( newState[2] === "Right Bank" && (newState[0] + 1 >= newState[1] || newState[0]+1 == 0) 
+                && (rightBank[0] - 1 >= rightBank[1] || rightBank[0] == 0)
+                && newState[0]+1 <= capacity[0] && newState[1] <= capacity[1] && rightBank[0]-1 <= capacity[0] && rightBank[1] <= capacity[1]    
+            ) {
+            newState[0] += 1;
+            newState[2] = "Left Bank";
+        }
+    }
 
-        // if Jug A is not full
-        if ( newState[0] < capacity[0] ) {
+    // Move one Cannibal from Right to Left
+    else if ( move == 6 ) {
+        if ( newState[2] === "Right Bank" && (newState[0] >= newState[1] + 1 || newState[0] == 0) 
+                && (rightBank[0] >= rightBank[1] - 1 || rightBank[0] == 0) 
+                && newState[0] <= capacity[0] && newState[1]+1 <= capacity[1] && rightBank[0] <= capacity[0] && rightBank[1]-1 <= capacity[1]
+            ) {
+            newState[1] += 1;
+            newState[2] = "Left Bank";
+        }
+    }
 
-            // case 1
-            if ( capacity[0] - newState[0] < newState[1] ) {
-                // B = B - (4-A), A = 4
-                newState[1] -= capacity[0] - newState[0];
-                newState[0] = capacity[0];
-            }
-            
-            // case 2
-            else {
-                // A = A + B, B = 0
-                newState[0] += newState[1];
-                newState[1] = 0;
-            }
+    // Move two Missionaries from Right to Left
+    else if ( move == 7 ) {
+        if ( newState[2] === "Right Bank" && (newState[0] + 2 >= newState[1] || newState[0]+2 == 0) 
+                && (rightBank[0] - 2 >= rightBank[1] || rightBank[0] == 0) 
+                && newState[0]+2 <= capacity[0] && newState[1] <= capacity[1] && rightBank[0]-2 <= capacity[0] && rightBank[1] <= capacity[1]
+            ) {
+            newState[0] += 2;
+            newState[2] = "Left Bank";
+        }
+    }
+
+    // Move two Cannibals from Right to Left
+    else if ( move == 8 ) {
+        if ( newState[2] === "Right Bank" && (newState[0] >= newState[1] + 2 || newState[0] == 0) 
+                && (rightBank[0] >= rightBank[1] - 2 || rightBank[0] == 0) 
+                && newState[0] <= capacity[0] && newState[1]+2 <= capacity[1] && rightBank[0] <= capacity[0] && rightBank[1]-2 <= capacity[1]
+            ) {
+            newState[1] += 2;
+            newState[2] = "Left Bank";
+        }
+    }
+
+    // Move one Missionary and one Cannibal from Right to Left
+    else if ( move == 9 ) {
+        // the extra conditions are mathematically not needed if the current state is legal, but putting it there just in case
+        if ( newState[2] === "Right Bank" && (newState[0] + 1 >= newState[1] + 1 || newState[0]+1 == 0) 
+                && (rightBank[0] - 1 >= rightBank[1] - 1 || rightBank[0] == 0) 
+                && newState[0]+1 <= capacity[0] && newState[1]+1 <= capacity[1] && rightBank[0]-1 <= capacity[0] && rightBank[1]-1 <= capacity[1]
+            ) {
+            newState[0] += 1;
+            newState[1] += 1;
+            newState[2] = "Left Bank";
         }
     }
 
@@ -370,15 +440,18 @@ function makeMove(state, move) {
 
 function generateAllStates(capacity) {
     /*
-    Number of possible states for jugs of capacity 4 and 3 is:
-    (4+1) * (3+1)
+    Possible states:
+    <i,j,L> <i,j,R> for all i,j = 0,1,2,3
     */
 
     let array = [];
     for( let i = 0; i <= capacity[0]; i++ ) {
         for ( let j = 0; j <= capacity[1]; j++ ) {
-            let newState = [i,j];
-            array.push(newState);
+            let newStateL = [i,j, "Left Bank"];
+            let newStateR = [i,j, "Right Bank"];
+
+            array.push(newStateL);
+            array.push(newStateR);
         }
     }
 
@@ -392,11 +465,12 @@ function generateAllStates(capacity) {
 function deleteState(list, state) {
     
     for ( let i = 0; i < list.length; i++ ) {
-        if ( list[i][0] === state[0] && list[i][1] == state[1] ) {
+        if ( list[i][0] == state[0] && list[i][1] == state[1] && list[i][2] === state[2] ) {
             list.splice(i, 1);
         }
     }
 }
+
 
 /**
  * Generates the required solution state space graph starting from the intial state [0,0]
@@ -408,8 +482,8 @@ function deleteState(list, state) {
  * @param {*} stateID 
  * @returns 
  */
-function generateGraph(graph, state, stateID) {
-
+ function generateGraph(graph, state, stateID) {
+    
     // if all possible states have been generated, exit the function
     if ( statesToBeAdded.length == 0 ) {
         return;
@@ -418,10 +492,11 @@ function generateGraph(graph, state, stateID) {
     for ( let i = 0; i < numberOfMoves; i++ ) {
 
         let newState = makeMove(state, i);
+        // console.log("CHECK HERE RIGHT NOW: ",newState, i );
 
         // don't consider the newly generated state if it is the same as the previous one
         // { remove first condition of [0,0] }
-        if ( state[0] == newState[0] && state[1] == newState[1] ) {
+        if ( state[0] == newState[0] && state[1] == newState[1] && state[2] === newState[2] ) {
             continue;
         }
 
@@ -434,8 +509,7 @@ function generateGraph(graph, state, stateID) {
             // else it is true
             
             let didAdd = graph.addEdge(stateID, newNodeID);
-
-            // this key condition helps terminate all the recursive calls
+            //HERE MAYBE (not)
             if ( didAdd == true ) {
                 generateGraph(graph, newState, newNodeID);
             }
@@ -454,10 +528,11 @@ function generateGraph(graph, state, stateID) {
     }
 }
 
+
 function justSolveIt() {
 
-    let finalState = [2,0];
-    // let finalState = [3,0];
+    let finalState = [0,0,"Right Bank"];
+    // let finalState = [2,0,"Right Bank"];
 
     let solutionBFS = graph.solveBFS(finalState);
 
@@ -473,8 +548,8 @@ function justSolveIt() {
 
     var renderer = new Renderer('#paper', graphDraw, 600, 600);
     renderer.draw();
-    
 }
+
 
 
 // globals:
@@ -489,21 +564,25 @@ var graphDraw = new Graph2();
 
 // Graph involved in actual computation. My Graph Object
 let graph = new Graph();
-graph.addNode(0, [0,0]);
+graph.addNode(0, [3,3,"Left Bank"]);
 
-var numberOfMoves = 6;
+
 var nodeID = 0;
-var capacity = [4,3];
-// var capacity = [6,4];
+var numberOfMoves = 10;
+
+// Here, capacity is an array of two elements [Total_M, Total_C]
+// where Total_M is the total number of Missionaries and Total_C is the total number of Cannibals
+var capacity = [3,3];
+
 
 // contains all possible states that need to be present in the tree.
 var statesToBeAdded = generateAllStates(capacity);
 
-deleteState(statesToBeAdded, [0,0]);
+deleteState(statesToBeAdded, [3,3,"Left Bank"]);
 
 console.log("States to be Added: ", statesToBeAdded);
 
-generateGraph(graph, [0,0], 0);
+generateGraph(graph, [3,3,"Left Bank"], 0);
 
 console.log("State Space Graph:");
 graph.displayGraph();
@@ -514,8 +593,8 @@ console.log("\n\n");
 
 document.getElementById("solveID").addEventListener("click", justSolveIt);
 
-
 console.log("\nReached the end");
+
 },{"graphdracula":3}],2:[function(require,module,exports){
 'use strict';
 
