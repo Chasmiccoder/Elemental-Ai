@@ -1,5 +1,8 @@
 /*
 
+Problem with our approach: WE SHOULD NOT BE PRECOMPUTING THE SOLUTION STATE SPACE.
+We should infact 'discover' the state space with the searching algorithm employed
+
 Problem Statement -
 ===================
 
@@ -187,7 +190,7 @@ class Graph {
         graphDraw.addNode( JSON.stringify([0,0]) );
 
         parents[source] = -1;
-        while( queue.length != 0 ) {
+        whileLoop: while( queue.length != 0 ) {
             let v = queue.shift();
 
             let numNeighbors = this.#nodes[v].edges.length;
@@ -213,6 +216,10 @@ class Graph {
                     distances[u] = distances[v] + 1;
                     parents[u] = v;
                 }
+                if(JSON.stringify(graph.getStateFromNodeID(destination)) == JSON.stringify(graph.getStateFromNodeID(u))) {
+                    // console.log("WE REACHED AGAIN");
+                    break whileLoop;
+                } 
             }
         }
 

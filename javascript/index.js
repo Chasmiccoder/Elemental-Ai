@@ -191,9 +191,9 @@ class Graph {
 
                 // console.log("test param1:", graph.getStateFromNodeID(u));
                 // console.log("test param2:", u);
-                if(JSON.stringify([0,1,'Left Bank']) == JSON.stringify(graph.getStateFromNodeID(u))) {
-                    console.log("WE REACHED. BIG PROBLEM");
-                }
+                // if(JSON.stringify([0,1,'Left Bank']) == JSON.stringify(graph.getStateFromNodeID(u))) {
+                //     console.log("WE REACHED. BIG PROBLEM");
+                // }
 
                 if ( visited[u] == false ) {
                     visited[u] = true;
@@ -216,19 +216,11 @@ class Graph {
                 }
 
                 //changed to finalState instead of hard coding [0,0,"RB"]
-                if(JSON.stringify([0,0,'Right Bank']) == JSON.stringify(graph.getStateFromNodeID(u))) {
-                    console.log("WE REACHED AGAIN");
+                if(JSON.stringify(graph.getStateFromNodeID(destination)) == JSON.stringify(graph.getStateFromNodeID(u))) {
+                    // console.log("WE REACHED AGAIN");
                     break whileLoop;
-                }
-
-
-               
+                }  
             }
-
-            // if ( flag == 1 ) {
-            //     break;
-            // }
-
         }
 
         if ( visited[destination] == false ) {

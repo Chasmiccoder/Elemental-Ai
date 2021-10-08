@@ -1,5 +1,8 @@
 /*
 
+Problem with our approach: WE SHOULD NOT BE PRECOMPUTING THE SOLUTION STATE SPACE.
+We should infact 'discover' the state space with the searching algorithm employed
+
 Problem Statement -
 ===================
 
@@ -187,13 +190,6 @@ class Graph {
             let numNeighbors = this.#nodes[v].edges.length;
             for ( let i = 0; i < numNeighbors; i++ ) {
                 let u = this.#nodes[v].edges[i];
-
-                // console.log("test param1:", graph.getStateFromNodeID(u));
-                // console.log("test param2:", u);
-                if(JSON.stringify([0,1,'Left Bank']) == JSON.stringify(graph.getStateFromNodeID(u))) {
-                    console.log("WE REACHED. BIG PROBLEM");
-                }
-
                 if ( visited[u] == false ) {
                     visited[u] = true;
                     
@@ -204,7 +200,6 @@ class Graph {
                                    style: {
                                         stroke: '#bfa',
                                         fill: '#56f',
-                                       // label: 'Label'
                                    }
                                } );
    
@@ -215,19 +210,11 @@ class Graph {
                 }
 
                 //changed to finalState instead of hard coding [0,0,"RB"]
-                if(JSON.stringify([0,0,'Right Bank']) == JSON.stringify(graph.getStateFromNodeID(u))) {
-                    console.log("WE REACHED AGAIN");
+                if(JSON.stringify(graph.getStateFromNodeID(destination)) == JSON.stringify(graph.getStateFromNodeID(u))) {
+                    // console.log("WE REACHED AGAIN");
                     break whileLoop;
-                }
-
-
-               
+                }  
             }
-
-            // if ( flag == 1 ) {
-            //     break;
-            // }
-
         }
 
         if ( visited[destination] == false ) {
