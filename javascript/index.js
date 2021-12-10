@@ -4,7 +4,14 @@
 Problem Statement -
 ===================
 
-Transport 3 Missionaries and 3 Cannibals from Left to Right
+The fox, goose and bag of beans problem is described as follows: 
+A farmer must transport a fox, goose and bag of beans from one side of a 
+river to another using a boat which can only hold one item in addition to 
+the farmer, subject to the constraints that the fox cannot be left alone 
+with the goose, and the goose cannot be left alone with the beans. 
+
+In this context, find a solution path by defining appropriate production 
+rules and state space search using Depth First Search (avoid repeated states).
 
 
 State Space Graph Generation -
@@ -32,25 +39,14 @@ more than once.
     After function execution, the list contains all the impossible states
 
 
-Possible Operations -
-=====================
-
-???
 
 
 Variable Information -
 ======================
 
-states - [M,C,B]
-An array of 3 elements
-M = Number of Missionaries on the Left Hand Side {0,1,2,3}
-C = Number of Cannibals on the Left Hand Side {0,1,2,3}
-B = Where the boat currently is {'Left Bank', 'Right Bank'}
-
-Searching Algorithms -
-======================
-
-    1) BFS
+states - [ Fox, Goose, Beans, Farmer ]
+An array of 4 elements
+Positions of the characters can be {'Left', 'Right'}
 
 
 ---------------------------------------------
@@ -142,7 +138,7 @@ class Graph {
         for ( let i = 0; i < this.#n; i++ ) {
             
             // If the state is present in the graph (specific to the Missionaries and Cannibals problem)
-            if ( this.#nodes[i].state[0] == state[0] && this.#nodes[i].state[1] == state[1] && this.#nodes[i].state[2] === state[2] ) {
+            if ( this.#nodes[i].state[0] == state[0] && this.#nodes[i].state[1] == state[1] && this.#nodes[i].state[2] === state[2] && this.#nodes[i].state[3] === state[3] ) {
                 return i;
             }
         }
@@ -153,135 +149,64 @@ class Graph {
         return this.#nodes[nodeID].state;
     }
 
+    // dfs(source, destination, visited = {} ) {
+    dfs(source, destination) {
+        // let path = new Array(this.#n);
+        let path = [];
 
-    /**
-     * Searches for the destination node from the source node via BFS.
-     * Updates the graph dynamically as the search is performed.
-     * 
-     * @param {Number} source 
-     * @param {Number} destination 
-     * @returns {Array} Path and number of steps taken
-     * 
-     */
-    bfs(source, destination) {
-        let queue = [];
-        let visited   = new Array(this.#n);
-        let distances = new Array(this.#n);
-        let parents   = new Array(this.#n);
+        // let s = new Array(this.#n); // stack
+        let s = [];
 
-        // steps is the number of nodes BFS visited in order to reach the destination node (excluding the source node)
-        // it is a measure of how effective the particular searching algorithm is for that problem
-        let steps = 0;
+        let explored = new Set();
+        s.push(source);
 
-        visited.fill(false);
+        console.log("DFS Path:");
+        let previous = 0;
 
-        queue.push(source);
-        visited[source] = true;
+        // explore the source node
+        explored.add(source);
 
-        graphDraw.addNode( JSON.stringify([3,3,'Left Bank']) );
-        let flag = 0;
+        // loop until the stack is empty
+        while (s.length > 0) {
+            let t = s.pop();
 
-        parents[source] = -1;
-        whileLoop: while( queue.length != 0 ) {
-            let v = queue.shift();
+            // current node being visited
+            console.log(t);
+            graphDraw.addNode( JSON.stringify( this.#nodes[t].state) );
 
-            let numNeighbors = this.#nodes[v].edges.length;
-            for ( let i = 0; i < numNeighbors; i++ ) {
-                let u = this.#nodes[v].edges[i];
-
-                // console.log("test param1:", graph.getStateFromNodeID(u));
-                // console.log("test param2:", u);
-                // if(JSON.stringify([0,1,'Left Bank']) == JSON.stringify(graph.getStateFromNodeID(u))) {
-                //     console.log("WE REACHED. BIG PROBLEM");
-                // }
-
-                if ( visited[u] == false ) {
-                    visited[u] = true;
-                    
-                    graphDraw.addNode( JSON.stringify(this.#nodes[u].state) );
-                    graphDraw.addEdge( JSON.stringify(this.#nodes[u].state), 
-                               JSON.stringify(this.#nodes[v].state), 
+            if(previous != 0) {
+                graphDraw.addEdge( JSON.stringify(this.#nodes[t].state), 
+                               JSON.stringify(this.#nodes[previous].state), 
                                {
                                    style: {
                                         stroke: '#bfa',
                                         fill: '#56f',
-                                       // label: 'Label'
                                    }
                                } );
-   
-                    steps++;
-                    queue.push(u);
-                    distances[u] = distances[v] + 1;
-                    parents[u] = v;
-                }
-
-                //changed to finalState instead of hard coding [0,0,"RB"]
-                if(JSON.stringify(graph.getStateFromNodeID(destination)) == JSON.stringify(graph.getStateFromNodeID(u))) {
-                    // console.log("WE REACHED AGAIN");
-                    break whileLoop;
-                }  
             }
-        }
+            
 
-        if ( visited[destination] == false ) {
-            console.log("No path!\n");
-            return {};
-        }
-        else {
-            let path = [];
-            for ( let v = destination; v != -1; v = parents[v] ) {
-                path.push(v);
-            }
-            path.reverse();
-            return {"path" : path, "steps" : steps};
-        }
-    }
-
-    dfs(source, destination, visited = {} ) {
-        if ( visited[source] ) {
-            return false;
-        }
-
-        if ( source === destination ) {
-            return true;
-        }
-
-        visited[source] = true;
-
-        const neighbors = this.#nodes[source].edges;
-
-        for ( let i = 0; i < neighbors.length; i++ ) {
-            if ( this.dfs(neighbors[i], destination, visited) ) {
+            if(t == destination) {
                 return true;
             }
+
+            // In the edges object, search for nodes this node is directly connected to and filter out the nodes that have already been explored.
+            // Then mark each unexplored node as explored and push it to the Stack.
+   
+            this.#nodes[t].edges.filter(n => !explored.has(n)).forEach(n => {
+                explored.add(n);
+                s.push(n);
+            })
+
+            previous = t;
         }
 
         return false;
     }
 
-    /**
-     * Solves the Water Jug problem using Breadth First Search
-     * Returns the path taken to reach the final state along with
-     * the number of steps it took BFS to reach the final state
-     * 
-     * @param {Array} finalState 
-     * @return {Number} Solution
-     */
-    solveBFS(finalState) {
-        let source = 0;
-        let destination = this.isStatePresent(finalState);
-
-        if ( destination == -1 ) {
-            console.log("It is not possible to reach this state!");
-            return -1;
-        }
-
-        return this.bfs(source, destination);
-    }
-
 
     /**
-     * Solves the Water Jug problem using Depth First Search
+     * Solves the problem using Depth First Search
      * Returns the path taken to reach the final state along with
      * the number of steps it took DFS to reach the final state
      * 
@@ -289,134 +214,79 @@ class Graph {
      * @return {Number} Solution
      */
     solveDFS(finalState) {
-        
+        let source = 0;
+        return this.dfs(source, finalState);
     }
 }
 
+// returns true if the state is valid, otherwise returns false
+function stateIsValid(state) {
+    
+    // if the fox and goose are in the same bank, but if the farmer is not there,
+    // then the state is invalid
+    if(state[0] == state[1] && state[0] != state[3]) {
+        return false;
+    }
 
-// optimize this function, make it smaller and generalize it for N Missionaries and M Cannibals
+    // if the goose and the beans are at the same bank, but if the farmer is not there,
+    // then the state is invalid
+    else if(state[1] == state[2] && state[1] != state[3]) {
+        return false;
+    }
+
+    return true;
+}
+
+
 function makeMove(state, move) {
     // making a copy of the original state
     let newState = [...state];
 
-    // let capacity = [3,3]; // remove this line later
-
-    let rightBank = [capacity[0]-newState[0], capacity[1]-newState[1]];
-
-    // Move one Missionary from Left to Right if the boat is at the Left Bank and if the new state is legal
-    if ( move == 0 ) {
-        if ( newState[2] === "Left Bank" && (newState[0] - 1 >= newState[1] || newState[0]-1 == 0)
-                && (rightBank[0] + 1 >= rightBank[1] || rightBank[0] == 0) 
-                && newState[0]-1 <= capacity[0] && newState[1] <= capacity[1] && rightBank[0]+1 <= capacity[0] && rightBank[1] <= capacity[1]
-            ) {
-            newState[0] -= 1;
-            newState[2] = "Right Bank";
+    // move the farmer only
+    if(move == 0) {
+        if(newState[3] == "Left") {
+            newState[3] = "Right";
+        } else {
+            newState[3] = "Left";
         }
     }
 
-    // Move one Cannibal from the Left to Right
-    else if ( move == 1 ) {
-        // console.log("BOI: ", newState);
-        // console.log("done\n");
-        if ( newState[2] === "Left Bank" && (newState[0] >= newState[1] - 1 || newState[0] == 0) 
-                && (rightBank[0] >= rightBank[1] + 1 || rightBank[0] == 0) 
-                && newState[0] <= capacity[0] && newState[1]-1 <= capacity[1] && rightBank[0] <= capacity[0] && rightBank[1]+1 <= capacity[1]
-            ) {
-            newState[1] -= 1;
-            newState[2] = "Right Bank";
-            // console.log("NEEDS TO ENTER THIS");
+    // if the farmer and the fox are in the same bank, move both of them
+    else if(move == 1) {
+        if(newState[0] == newState[3]) {
+            if(newState[0] == "Left") {
+                newState[0] = "Right";
+                newState[3] = "Right";
+            } else {
+                newState[0] = "Left";
+                newState[3] = "Left";
+            }
         }
     }
 
-    // Move two Missionaries from the Left to Right
-    else if ( move == 2 ) {
-        if ( newState[2] === "Left Bank" && (newState[0] - 2 >= newState[1] || newState[0]-2 == 0) 
-                && (rightBank[0] + 2 >= rightBank[1] || rightBank[0] == 0) 
-                && newState[0]-2 <= capacity[0] && newState[1] <= capacity[1] && rightBank[0]+2 <= capacity[0] && rightBank[1] <= capacity[1]
-            ) {
-            newState[0] -= 2;
-            newState[2] = "Right Bank";
+    // if the farmer and the goose are in the same bank, move both of them
+    else if(move == 2) {
+        if(newState[1] == newState[3]) {
+            if(newState[1] == "Left") {
+                newState[1] = "Right";
+                newState[3] = "Right";
+            } else {
+                newState[1] = "Left";
+                newState[3] = "Left";
+            }
         }
     }
 
-    // Move two Cannibals from the Left to Right
-    else if ( move == 3 ) {
-        if ( newState[2] === "Left Bank" && (newState[0] >= newState[1] - 2 || newState[0] == 0) 
-                && (rightBank[0] >= rightBank[1] + 2 || rightBank[0] == 0) 
-                && newState[0] <= capacity[0] && newState[1]-2 <= capacity[1] && rightBank[0] <= capacity[0] && rightBank[1]+2 <= capacity[1]
-            ) {
-            newState[1] -= 2;
-            newState[2] = "Right Bank";
-        }
-    }
-
-    // Move one Missionary and one Cannibal from the Left to Right
-    else if ( move == 4 ) {
-        // the extra conditions are mathematically not needed if the current state is legal, but putting it there just in case
-        if ( newState[2] === "Left Bank" && (newState[0] - 1 >= newState[1] - 1 || newState[0]-1 == 0) 
-                && (rightBank[0] + 1 >= rightBank[1] + 1 || rightBank[0] == 0) 
-                && newState[0]-1 <= capacity[0] && newState[1]-1 <= capacity[1] && rightBank[0]+1 <= capacity[0] && rightBank[1]+1 <= capacity[1]
-            ) {
-            newState[0] -= 1;
-            newState[1] -= 1;
-            newState[2] = "Right Bank";
-        }
-    }
-
-    // Move one Missionary from Right to Left
-    else if ( move == 5 ) {
-        if ( newState[2] === "Right Bank" && (newState[0] + 1 >= newState[1] || newState[0]+1 == 0) 
-                && (rightBank[0] - 1 >= rightBank[1] || rightBank[0] == 0)
-                && newState[0]+1 <= capacity[0] && newState[1] <= capacity[1] && rightBank[0]-1 <= capacity[0] && rightBank[1] <= capacity[1]    
-            ) {
-            newState[0] += 1;
-            newState[2] = "Left Bank";
-        }
-    }
-
-    // Move one Cannibal from Right to Left
-    else if ( move == 6 ) {
-        if ( newState[2] === "Right Bank" && (newState[0] >= newState[1] + 1 || newState[0] == 0) 
-                && (rightBank[0] >= rightBank[1] - 1 || rightBank[0] == 0) 
-                && newState[0] <= capacity[0] && newState[1]+1 <= capacity[1] && rightBank[0] <= capacity[0] && rightBank[1]-1 <= capacity[1]
-            ) {
-            newState[1] += 1;
-            newState[2] = "Left Bank";
-        }
-    }
-
-    // Move two Missionaries from Right to Left
-    else if ( move == 7 ) {
-        if ( newState[2] === "Right Bank" && (newState[0] + 2 >= newState[1] || newState[0]+2 == 0) 
-                && (rightBank[0] - 2 >= rightBank[1] || rightBank[0] == 0) 
-                && newState[0]+2 <= capacity[0] && newState[1] <= capacity[1] && rightBank[0]-2 <= capacity[0] && rightBank[1] <= capacity[1]
-            ) {
-            newState[0] += 2;
-            newState[2] = "Left Bank";
-        }
-    }
-
-    // Move two Cannibals from Right to Left
-    else if ( move == 8 ) {
-        if ( newState[2] === "Right Bank" && (newState[0] >= newState[1] + 2 || newState[0] == 0) 
-                && (rightBank[0] >= rightBank[1] - 2 || rightBank[0] == 0) 
-                && newState[0] <= capacity[0] && newState[1]+2 <= capacity[1] && rightBank[0] <= capacity[0] && rightBank[1]-2 <= capacity[1]
-            ) {
-            newState[1] += 2;
-            newState[2] = "Left Bank";
-        }
-    }
-
-    // Move one Missionary and one Cannibal from Right to Left
-    else if ( move == 9 ) {
-        // the extra conditions are mathematically not needed if the current state is legal, but putting it there just in case
-        if ( newState[2] === "Right Bank" && (newState[0] + 1 >= newState[1] + 1 || newState[0]+1 == 0) 
-                && (rightBank[0] - 1 >= rightBank[1] - 1 || rightBank[0] == 0) 
-                && newState[0]+1 <= capacity[0] && newState[1]+1 <= capacity[1] && rightBank[0]-1 <= capacity[0] && rightBank[1]-1 <= capacity[1]
-            ) {
-            newState[0] += 1;
-            newState[1] += 1;
-            newState[2] = "Left Bank";
+    // if the farmer and the beans are on the same bank, move both of them
+    else if(move == 3) {
+        if(newState[2] == newState[3]) {
+            if(newState[2] == "Left") {
+                newState[2] = "Right";
+                newState[3] = "Right";
+            } else {
+                newState[2] = "Left";
+                newState[3] = "Left";
+            }
         }
     }
 
@@ -427,42 +297,72 @@ function makeMove(state, move) {
         console.log( move );
     }
 
-    return newState;
+    // return the new state only if it's valid
+    if(stateIsValid(newState)) {
+        return newState;
+    } else {
+        return state;
+    }
 }
 
-function generateAllStates(capacity) {
+function generateAllStates() {
     /*
     Possible states:
-    <i,j,L> <i,j,R> for all i,j = 0,1,2,3
+    <Fox, Goose, Beans, Farmer> for all characters belonging to {'Left', 'Right'}
+    Since the array has 4 values, the total number of possible
+    states will be 2^4 = 16
     */
 
     let array = [];
-    for( let i = 0; i <= capacity[0]; i++ ) {
-        for ( let j = 0; j <= capacity[1]; j++ ) {
-            let newStateL = [i,j, "Left Bank"];
-            let newStateR = [i,j, "Right Bank"];
 
-            array.push(newStateL);
-            array.push(newStateR);
+    for(let i1 = 0; i1 < 2; i1++) {
+        for(let i2 = 0; i2 < 2; i2++) {
+            for(let i3 = 0; i3 < 2; i3++) {
+                for(let i4 = 0; i4 < 2; i4++) {
+                    let newState = [];
+                    if(i1 == 0) {
+                        newState.push("Left");
+                    } else {
+                        newState.push("Right");
+                    }
+
+                    if(i2 == 0) {
+                        newState.push("Left");
+                    } else {
+                        newState.push("Right");
+                    }
+
+                    if(i3 == 0) {
+                        newState.push("Left");
+                    } else {
+                        newState.push("Right");
+                    }
+
+                    if(i4 == 0) {
+                        newState.push("Left");
+                    } else {
+                        newState.push("Right");
+                    }
+
+                    array.push(newState)
+                }
+            }
         }
     }
 
     return array;
 }
 
-/** 
- * Deletes an element from an array of states by value
- * 
-*/
+
+// Deletes an element from an array of states by value 
 function deleteState(list, state) {
     
     for ( let i = 0; i < list.length; i++ ) {
-        if ( list[i][0] == state[0] && list[i][1] == state[1] && list[i][2] === state[2] ) {
+        if ( list[i][0] == state[0] && list[i][1] == state[1] && list[i][2] == state[2] && list[i][3] == state[3] ) {
             list.splice(i, 1);
         }
     }
 }
-
 
 /**
  * Generates the required solution state space graph starting from the intial state [0,0]
@@ -484,11 +384,9 @@ function deleteState(list, state) {
     for ( let i = 0; i < numberOfMoves; i++ ) {
 
         let newState = makeMove(state, i);
-        // console.log("CHECK HERE RIGHT NOW: ",newState, i );
 
         // don't consider the newly generated state if it is the same as the previous one
-        // { remove first condition of [0,0] }
-        if ( state[0] == newState[0] && state[1] == newState[1] && state[2] === newState[2] ) {
+        if ( state[0] == newState[0] && state[1] == newState[1] && state[2] == newState[2] && state[3] == newState[3] ) {
             continue;
         }
 
@@ -499,9 +397,7 @@ function deleteState(list, state) {
 
             // addEdge() adds an edge only if the edge is not present. If it was not present, didAdd becomes false
             // else it is true
-            
             let didAdd = graph.addEdge(stateID, newNodeID);
-            //HERE MAYBE (not)
             if ( didAdd == true ) {
                 generateGraph(graph, newState, newNodeID);
             }
@@ -520,20 +416,11 @@ function deleteState(list, state) {
     }
 }
 
-
 function justSolveIt() {
 
-    let finalState = [0,0,"Right Bank"];
-    // let finalState = [2,0,"Right Bank"];
+    let finalState = ["Right", "Right", "Right", "Right"]
 
-    let solutionBFS = graph.solveBFS(finalState);
-
-    console.log("Steps BFS:", solutionBFS["steps"]);
-    console.log("\nSolution Path BFS: ", solutionBFS["path"]);
-
-    for ( let i = 0; i < solutionBFS["path"].length; i++ ) {
-        console.log(graph.getStateFromNodeID( solutionBFS["path"][i]));
-    }
+    let solutionDFS = graph.solveDFS(finalState);
 
     var layouter = new Layout(graphDraw);
     layouter.layout();
@@ -541,7 +428,6 @@ function justSolveIt() {
     var renderer = new Renderer('#paper', graphDraw, 600, 600);
     renderer.draw();
 }
-
 
 
 // globals:
@@ -556,25 +442,19 @@ var graphDraw = new Graph2();
 
 // Graph involved in actual computation. My Graph Object
 let graph = new Graph();
-graph.addNode(0, [3,3,"Left Bank"]);
-
+graph.addNode(0, ["Left","Left","Left","Left"]); // everyone starts at the left bank
 
 var nodeID = 0;
-var numberOfMoves = 10;
-
-// Here, capacity is an array of two elements [Total_M, Total_C]
-// where Total_M is the total number of Missionaries and Total_C is the total number of Cannibals
-var capacity = [3,3];
-
+var numberOfMoves = 4;
 
 // contains all possible states that need to be present in the tree.
-var statesToBeAdded = generateAllStates(capacity);
+var statesToBeAdded = generateAllStates();
 
-deleteState(statesToBeAdded, [3,3,"Left Bank"]);
+deleteState(statesToBeAdded, ["Left","Left","Left","Left"]);
 
 console.log("States to be Added: ", statesToBeAdded);
 
-generateGraph(graph, [3,3,"Left Bank"], 0);
+generateGraph(graph, ["Left","Left","Left","Left"], 0);
 
 console.log("State Space Graph:");
 graph.displayGraph();
@@ -586,6 +466,8 @@ console.log("\n\n");
 document.getElementById("solveID").addEventListener("click", justSolveIt);
 
 console.log("\nReached the end");
+
+
 
 },{"graphdracula":3}],2:[function(require,module,exports){
 'use strict';

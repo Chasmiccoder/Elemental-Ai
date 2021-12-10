@@ -23,6 +23,9 @@ npm install --save graphdracula raphael
 
 browserify .\Elemental-Ai\Water_Jug_Problem.js -o javascript/index.js
 browserify .\Elemental-Ai\Missionaries_and_Cannibals_Problem.js -o javascript/index.js
+
+browserify .\Elemental-Ai\midTerm.js -o javascript/index.js
+browserify .\Elemental-Ai\labFinal.js -o javascript/index.js
 --------------------------------------------------------------------------------
 
 

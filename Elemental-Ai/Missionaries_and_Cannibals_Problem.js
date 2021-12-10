@@ -1,8 +1,5 @@
 /*
 
-Problem with our approach: WE SHOULD NOT BE PRECOMPUTING THE SOLUTION STATE SPACE.
-We should infact 'discover' the state space with the searching algorithm employed
-
 Problem Statement -
 ===================
 
