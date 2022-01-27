@@ -7,7 +7,6 @@ AI based problem solver with a clean GUI that solves some of the most famous puz
 * Water Jug Problem
 * Missionaries and Cannibals Problem
 
-
 Tech Stack:
 
 Using Dracula.js to plot graphs
