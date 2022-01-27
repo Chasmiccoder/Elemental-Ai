@@ -9,6 +9,7 @@ AI based problem solver with a clean GUI that solves some of the most famous puz
 
 Tech Stack:
 
+
 Using Dracula.js to plot graphs
 
 
